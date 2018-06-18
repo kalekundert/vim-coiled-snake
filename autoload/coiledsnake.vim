@@ -6,7 +6,7 @@ let s:class_pattern = '^\s*class\s'
 let s:function_pattern = '^\s*\(def\s\|if __name__\s==\)'
 let s:block_pattern = join([s:class_pattern, s:function_pattern], '\|')
 let s:decorator_pattern = '^\s*@'
-let s:string_start_pattern = '[bBfFrRuU]\{0,2}\(''''''\|"""\)'
+let s:string_start_pattern = '[bBfFrRuU]\{0,2}\(''''''\|"""\)\\\?'
 let s:string_start_end_pattern = s:string_start_pattern . '.*\1'
 let s:docstring_pattern = '^\s*' . s:string_start_pattern
 let s:docstring_close_pattern = '\(''''''\|"""\)'
@@ -484,9 +484,10 @@ endfunction
 function! s:FindDocstringTitle(focus, foldstart, foldend) abort "{{{1
     let ii = matchend(a:focus.text, s:string_start_pattern.'\s*')
     let line = a:focus.text[ii:len(a:focus.text)]
+    let indent = repeat(' ', indent(a:foldstart))
 
     if line !~# s:blank_pattern
-        let a:focus.text = line
+        let a:focus.text = indent . line
         return
     endif
 
@@ -494,7 +495,8 @@ function! s:FindDocstringTitle(focus, foldstart, foldend) abort "{{{1
         let line = getline(a:foldstart + offset)
 
         if line !~# s:blank_pattern
-            let a:focus.text = line
+            let jj = matchend(line, '^\s*')
+            let a:focus.text = indent . line[jj:]
             let a:focus.offset = offset
             return
         endif
