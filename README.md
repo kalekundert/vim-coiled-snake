@@ -1,5 +1,5 @@
-Coiled Snake
-============
+Coiled Snake: Python Folding for Vim
+====================================
 Coiled Snake is a vim plugin that provides automatic folding of python code. 
 Its priorities are: (i) to make folds that are satisfyingly compact, (ii) to be 
 attractive and unobtrusive, and (iii) to be robust to any kind of style or 
@@ -47,8 +47,9 @@ file:
 
 Usage
 -----
-Coiled Snake simply uses the standard folding commands.  If you're not 
-familiar, here's a brief introduction:
+Coiled Snake simply uses the standard folding commands.  See [``:help 
+fold-commands``](https://neovim.io/doc/user/fold.html) if you're 
+not familiar, but below the commands I use most frequently:
 
 - ``zo``: Open a fold
 - ``zc``: Close a fold
@@ -57,8 +58,57 @@ familiar, here's a brief introduction:
 - ``zR``: Open every fold.
 - ``zM``: Close every fold.
 
-See [``:help folding``](https://neovim.io/doc/user/fold.html) for more 
-information.
+You can prevent Coiled Snake from folding a line that it would otherwise by 
+putting a ``#`` at the end of the line.  For example, the following function 
+would not be folded:
+
+    def not_worth_folding(): #
+        return 42
+
+Configuration
+-------------
+- ``g:coiled_snake_set_foldtext``
+    
+  If false, don't change the algorithm for labeling folds.
+
+- ``g:coiled_snake_set_foldexpr``
+
+  If false, don't change the algorithm for making folds.
+
+- ``g:CoiledSnakeConfigureFold(fold)``
+
+  This is a function that is called to customize how folds are made.  The 
+  argument is a ``Fold`` object, which describes what kind of fold it is 
+  (imports, function, class, docstring, etc.) and how it should be folded 
+  (e.g. whether it should be folded at all, where it should start and end, 
+  how trailing blank lines should be handled, etc.).  The purpose of the 
+  function is to inspect this fold and to change any settings you'd like.
+  
+  The best way to illustrate how this works is with an example:
+
+      function! g:CoiledSnakeConfigureFold(fold)
+
+          " Don't fold nested classes.
+          if a:fold.type == 'class'
+              let a:fold.max_level = 1
+
+          " Don't fold doubly nested functions, and include up to 2 
+          " trailing blank lines in function folds.
+          elseif a:fold.type == 'function'
+              let a:fold.max_level = 2
+              let a:fold.num_blanks_below = 2
+
+          " Only fold imports if there are at least 5 of them.
+          elseif a:fold.type == 'import'
+              let a:fold.min_lines = 5
+          endif
+
+          " If the whole program is shorter than 50 lines, don't fold 
+          " anything.
+          if line('$') < 50
+              let a:fold.ignore = 1
+          endif
+      endfunction
 
 Contributing
 ------------
