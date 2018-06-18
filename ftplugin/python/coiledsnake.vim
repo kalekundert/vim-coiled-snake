@@ -7,11 +7,12 @@ let b:vim_coiled_snake_loaded = 1
 " - Options to prevent folding at certain depths, fold sizes, parents?
 " - Write docs
 
-setlocal foldexpr=coiledsnake#FoldExpr(v:lnum)
-setlocal foldtext=coiledsnake#FoldText()
-setlocal foldmethod=expr
+call coiledsnake#loadSettings()
 
-augroup CoiledSnake
-    autocmd TextChanged,InsertLeave <buffer> call coiledsnake#ClearFolds()
-augroup END
+if g:coiled_snake_set_foldtext
+    call coiledsnake#EnableFoldText()
+endif
+if g:coiled_snake_set_foldexpr
+    call coiledsnake#EnableFoldExpr()
+endif
 

@@ -4,4 +4,4 @@ Plug 'Konfekt/FastFold'
 call plug#end()
 
 set foldcolumn=3
-
+let g:coiled_snake_set_foldexpr = 0

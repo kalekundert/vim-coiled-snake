@@ -151,7 +151,25 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
 
 endfunction
 
-function! coiledsnake#DebugLines() abort  "{{{1
+function! coiledsnake#loadSettings() abort "{{{1
+    call s:SetIfUndef('g:coiled_snake_set_foldexpr', 1)
+    call s:SetIfUndef('g:coiled_snake_set_foldtext', 1)
+endfunction
+
+function! coiledsnake#EnableFoldText() abort "{{{1
+    setlocal foldtext=coiledsnake#FoldText()
+endfunction
+
+function! coiledsnake#EnableFoldExpr() abort "{{{1
+    setlocal foldexpr=coiledsnake#FoldExpr(v:lnum)
+    setlocal foldmethod=expr
+
+    augroup CoiledSnake
+        autocmd TextChanged,InsertLeave <buffer> call coiledsnake#ClearFolds()
+    augroup END
+endfunction
+
+function! coiledsnake#DebugLines() abort "{{{1
     let lines = s:LinesFromBuffer()
 
     if type(lines) != type([])
@@ -172,7 +190,7 @@ function! coiledsnake#DebugLines() abort  "{{{1
     endfor
 endfunction
 
-function! coiledsnake#DebugFolds() abort  "{{{1
+function! coiledsnake#DebugFolds() abort "{{{1
     let lines = s:LinesFromBuffer()
     let folds = s:FoldsFromLines(lines)
 
@@ -185,7 +203,7 @@ function! coiledsnake#DebugFolds() abort  "{{{1
     endfor
 endfunction
 
-function! coiledsnake#DebugMarks() abort  "{{{1
+function! coiledsnake#DebugMarks() abort "{{{1
     echo "#    Fold  Line"
     for lnum in range(1, line('$'))
         echo printf("%-3s  %4s  %s",
@@ -195,7 +213,7 @@ function! coiledsnake#DebugMarks() abort  "{{{1
     endfor
 endfunction
 
-function! coiledsnake#DebugText() abort  "{{{1
+function! coiledsnake#DebugText() abort "{{{1
     echo "#    Line"
     for lnum in range(1, line('$'))
         echo FoldText(lnum, lnum+1)
@@ -203,6 +221,12 @@ function! coiledsnake#DebugText() abort  "{{{1
 endfunction
 
 " }}}1
+
+function! s:SetIfUndef(name, value) abort " {{{1
+    if ! exists(a:name)
+        let {a:name} = a:value
+    endif
+endfunction
 
 function! s:LinesFromBuffer() abort "{{{1
     let lines = []
