@@ -1,0 +1,7 @@
+call plug#begin()
+Plug '~/hacking/projects/vim-boa-fold'
+Plug 'Konfekt/FastFold'
+call plug#end()
+
+set foldcolumn=3
+
