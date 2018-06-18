@@ -14,26 +14,26 @@ let s:data_struct_pattern = '^\s*[a-zA-Z0-9_.]\+ = \({\|\[\|(\|'.s:string_start_
 let s:data_struct_close_pattern = '^\s*\(}\|\]\|)\|''''''\|"""\)$'
 let s:manual_open_pattern = '^\s*##'
 let s:manual_ignore_pattern = '#$'
-# }}}1
+" }}}1
 
-function! boa#FoldExpr(lnum) abort "{{{1
+function! coiledsnake#FoldExpr(lnum) abort "{{{1
     if !exists('b:folds')
-        let b:marks = boa#RefreshFolds()
+        let b:marks = coiledsnake#RefreshFolds()
     endif
     return get(b:marks, a:lnum, '=')
 endfunction
 
-function! boa#FoldText() abort "{{{1
-    return boa#FormatText(v:foldstart, v:foldend)
+function! coiledsnake#FoldText() abort "{{{1
+    return coiledsnake#FormatText(v:foldstart, v:foldend)
 endfunction
 
-function! boa#ClearFolds() abort "{{{1
+function! coiledsnake#ClearFolds() abort "{{{1
     if exists('b:marks')
         unlet b:marks
     endif
 endfunction
 
-function! boa#RefreshFolds() abort "{{{1
+function! coiledsnake#RefreshFolds() abort "{{{1
     let b:marks = {}
     let lines = s:LinesFromBuffer()
     let folds = s:FoldsFromLines(lines)
@@ -79,17 +79,12 @@ function! boa#RefreshFolds() abort "{{{1
             unlet b:marks[closing_lnum]
         endif
 
-        echo closing_lnum
-        echo has_key(b:marks, closing_lnum)
-        echo closing_lnum == l:fold.lnum
-        echo b:marks
-
     endfor
 
     return b:marks
 endfunction
 
-function! boa#FormatText(foldstart, foldend) abort " {{{1
+function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
     " Find the line that should be used to represent the fold.  This is usually 
     " the first line, but docstrings and decorators are handled specially.
 
@@ -156,7 +151,7 @@ function! boa#FormatText(foldstart, foldend) abort " {{{1
 
 endfunction
 
-function! boa#DebugLines() abort  "{{{1
+function! coiledsnake#DebugLines() abort  "{{{1
     let lines = s:LinesFromBuffer()
 
     if type(lines) != type([])
@@ -177,7 +172,7 @@ function! boa#DebugLines() abort  "{{{1
     endfor
 endfunction
 
-function! boa#DebugFolds() abort  "{{{1
+function! coiledsnake#DebugFolds() abort  "{{{1
     let lines = s:LinesFromBuffer()
     let folds = s:FoldsFromLines(lines)
 
@@ -190,17 +185,17 @@ function! boa#DebugFolds() abort  "{{{1
     endfor
 endfunction
 
-function! boa#DebugMarks() abort  "{{{1
+function! coiledsnake#DebugMarks() abort  "{{{1
     echo "#    Fold  Line"
     for lnum in range(1, line('$'))
         echo printf("%-3s  %4s  %s",
                     \ lnum,
-                    \ boa#FoldExpr(lnum),
+                    \ coiledsnake#FoldExpr(lnum),
                     \ getline(lnum))
     endfor
 endfunction
 
-function! boa#DebugText() abort  "{{{1
+function! coiledsnake#DebugText() abort  "{{{1
     echo "#    Line"
     for lnum in range(1, line('$'))
         echo FoldText(lnum, lnum+1)
@@ -328,8 +323,6 @@ function! s:InitFold(line) abort "{{{1
         return l:close - l:open + 1
     endfunction
 
-    echo s:data_struct_pattern
-
     if ! a:line.is_code
         " Don't match any of the other patterns if this line is a comment of a 
         " multiline string.
@@ -354,7 +347,6 @@ function! s:InitFold(line) abort "{{{1
         let fold.num_blanks_below = 1
 
     elseif a:line.text =~# s:data_struct_pattern
-        echo 'strut'
         let fold.type = 'struct'
         let fold.FindClosingInfo = function('s:CloseDataStructure')
         let fold.max_level = 1
