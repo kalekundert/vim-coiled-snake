@@ -2,6 +2,7 @@
 let s:blank_pattern = '^\s*$'
 let s:comment_pattern = '^\s*#'
 let s:import_pattern = '^\(import\|from\)'
+let s:import_continue_pattern = join([s:import_pattern, s:blank_pattern, s:comment_pattern], '\|')
 let s:class_pattern = '^\s*class\s'
 let s:function_pattern = '^\s*\(def\s\|if __name__\s==\)'
 let s:block_pattern = join([s:class_pattern, s:function_pattern], '\|')
@@ -411,16 +412,19 @@ endfunction
 function! s:CloseImports(lines, folds) abort dict "{{{1
     " `self.lnum` is 1-indexed, indices into `lines` are 0-indexed.
     let ii = self.lnum - 1
+    let self.inside_line = a:lines[ii]
 
     for jj in range(ii+1, len(a:lines)-1)
         let line = a:lines[jj]
-        let prev_line = a:lines[jj-1]
 
-        if line.text !~# s:import_pattern
-            let self.inside_line = prev_line
+        if line.text =~# s:import_pattern
+            let self.inside_line = line
+        endif
+        if line.text !~# s:import_continue_pattern
             return
         endif
 
+        " Without this, each import line will try to open a new fold.
         if has_key(a:folds, line.lnum)
             let a:folds[line.lnum].ignore = 1
         endif
