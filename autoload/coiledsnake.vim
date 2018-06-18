@@ -269,6 +269,12 @@ function! s:FoldsFromLines(lines) abort "{{{1
         " supercede later ones.
         call l:fold.FindClosingInfo(a:lines, candidate_folds)
 
+        " Give the user a chance to configure the fold, e.g. set the max size 
+        " or level, decide to ignore it for any reason, etc.
+        if exists('*g:CoiledSnakeConfigureFold')
+            call g:CoiledSnakeConfigureFold(l:fold)
+        endif
+
         if l:fold.ignore
             continue
         endif

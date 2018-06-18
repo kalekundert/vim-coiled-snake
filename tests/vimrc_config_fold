@@ -1,0 +1,14 @@
+call plug#begin()
+Plug '~/hacking/projects/vim-coiled-snake'
+Plug 'Konfekt/FastFold'
+call plug#end()
+
+set foldcolumn=3
+
+function! g:CoiledSnakeConfigureFold(fold)
+    if a:fold.type == 'class'
+        let a:fold.max_level = 1
+    elseif a:fold.type == 'function'
+        let a:fold.max_level = 2
+    endif
+endfunction
