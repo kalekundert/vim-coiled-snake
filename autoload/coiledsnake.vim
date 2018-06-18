@@ -17,7 +17,7 @@ let s:manual_ignore_pattern = '#$'
 " }}}1
 
 function! coiledsnake#FoldExpr(lnum) abort "{{{1
-    if !exists('b:folds')
+    if !exists('b:marks')
         let b:marks = coiledsnake#RefreshFolds()
     endif
     return get(b:marks, a:lnum, '=')
