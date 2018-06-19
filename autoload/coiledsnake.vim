@@ -302,7 +302,11 @@ function! s:FoldsFromLines(lines) abort "{{{1
             continue
         endif
 
-        if l:fold.max_level > 0 && l:fold.level > l:fold.max_level
+        if l:fold.max_indent >= 0 && l:fold.opening_line.indent > l:fold.max_indent
+            continue
+        endif
+
+        if l:fold.max_level >= 0 && l:fold.level > l:fold.max_level
             continue
         endif
 
@@ -357,6 +361,7 @@ function! s:InitFold(line) abort "{{{1
     let fold.level = -1
     let fold.ignore = a:line.text =~# s:manual_ignore_pattern
     let fold.min_lines = 0
+    let fold.max_indent = -1
     let fold.max_level = -1
     let fold.num_blanks_below = 0
     let fold.opening_line = a:line
@@ -404,7 +409,7 @@ function! s:InitFold(line) abort "{{{1
     elseif a:line.text =~# s:data_struct_pattern
         let fold.type = 'struct'
         let fold.FindClosingInfo = function('s:CloseDataStructure')
-        let fold.max_level = 1
+        let fold.max_indent = 0
         let fold.min_lines = 6
 
     elseif a:line.text =~# s:docstring_pattern 

@@ -118,6 +118,12 @@ No configuration is necessary, but the following options are available:
       
       endfunction
 
+    By default, import blocks will only be folded if they are 4 lines or 
+    longer, class blocks will collapse up to 2 trailing blank lines, function 
+    blocks will collapse up to 1 trailing blank line, and data structure blocks 
+    (e.g. literal lists, dicts, sets) will only be folded if they are 
+    unindented and longer than 6 lines.
+
   ``Fold`` object attributes:
 
   - ``type`` (str, read-only): The kind of lines being folded.  The following 
@@ -136,8 +142,13 @@ No configuration is necessary, but the following options are available:
   - ``min_lines`` (int): If the fold would include fewer lines than this, it 
     will not be created. 
 
+  - ``max_indent`` (int): If the fold would be more indented than this, it will 
+    not be created.
+
   - ``max_level`` (int): If the fold would have a higher level than this, it 
-    will not be created. 
+    will not be created.  This is subtly different than ``max_indent``.  For 
+    example, consider a function defined in a for-loop.  Because the loop 
+    isn't folded, the level isn't affected while the indent is.
 
   - ``ignore`` (bool): If true, the fold will not be created.
 
