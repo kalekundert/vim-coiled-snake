@@ -3,5 +3,6 @@ Plug '~/hacking/projects/vim-coiled-snake'
 Plug 'Konfekt/FastFold'
 call plug#end()
 
-set foldcolumn=3
+set foldcolumn=5
+set number
 

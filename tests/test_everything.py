@@ -4,13 +4,20 @@ Docstring
 
 import foo
 import bar
-from baz import qaz
-from quz import buz
+
+from bar import baz
+from qux import quz
 
 class Class:
 
-    def method():
+    class NestedClass:
         pass
+
+
+    def method():
+        def nested_method():
+            pass
+
 
     @decorator
     def decoratee():
@@ -20,6 +27,9 @@ class Class:
 def function():
     code = 0
     more_code = 1
+
+    def nested_function():
+        pass
 
 code = 0
 more_code = 1

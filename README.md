@@ -92,28 +92,30 @@ No configuration is necessary, but the following options are available:
   The best way to illustrate how this works is with an example:
 
       function! g:CoiledSnakeConfigureFold(fold)
-
+      
           " Don't fold nested classes.
           if a:fold.type == 'class'
               let a:fold.max_level = 1
-
-          " Fold methods, but not nested functions.
+      
+          " Don't fold nested functions, but do fold methods (i.e. functions 
+          " nested inside classes).
           elseif a:fold.type == 'function'
-              if a:fold.parent.type == 'class':
+              let a:fold.max_level = 1
+              if get(a:fold.parent, 'type') == 'class'
                   let a:fold.max_level = 2
-              else:
-                  let a:fold.max_level = 2
-
-          " Only fold imports if there are at least 5 of them.
+              endif
+      
+          " Only fold imports if there are at least 3 of them.
           elseif a:fold.type == 'import'
-              let a:fold.min_lines = 5
+              let a:fold.min_lines = 3
           endif
-
-          " If the whole program is shorter than 50 lines, don't fold 
+      
+          " If the whole program is shorter than 30 lines, don't fold 
           " anything.
-          if line('$') < 50
+          if line('$') < 30
               let a:fold.ignore = 1
           endif
+      
       endfunction
 
   ``Fold`` object attributes:

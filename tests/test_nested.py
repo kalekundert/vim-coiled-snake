@@ -7,6 +7,7 @@ def foo():
 
                 pass
 
+code = 1
 
 class Bar:
     class Bar:

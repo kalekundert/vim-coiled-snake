@@ -39,7 +39,8 @@ function! coiledsnake#RefreshFolds() abort "{{{1
     let folds = s:FoldsFromLines(lines)
 
     " Cache where each fold should open and close.
-    for l:fold in values(folds)
+    for lnum in sort(keys(folds), 'N')
+        let l:fold = folds[lnum]
 
         " Open a fold at the appropriate level on this line.
         let b:marks[l:fold.lnum] = '>' . l:fold.level
@@ -181,7 +182,7 @@ function! coiledsnake#DebugLines() abort "{{{1
     echo "#   Code? Blank? Indent Text"
     for lnum in range(0, len(lines)-1)
         let line = lines[lnum]
-        echo printf("%3s %5s %6s %6s %s",
+        echo printf("%-3s %5s %6s %6s %s",
                     \ get(line, 'lnum', '???'),
                     \ get(line, 'is_code', '?'),
                     \ get(line, 'is_blank', '?'),
@@ -194,12 +195,20 @@ function! coiledsnake#DebugFolds() abort "{{{1
     let lines = s:LinesFromBuffer()
     let folds = s:FoldsFromLines(lines)
 
-    for lnum in keys(folds)
-        echo printf('Line #%d', lnum)
-        for attr in keys(folds[lnum])
-            echo printf('  %s: %s', attr, folds[lnum][attr])
-        endfor
-        echo '----'
+    echo "  # In Out Type      Parent    Lvl Ig N? >? Text"
+    for lnum in sort(keys(folds), 'N')
+        let fold = folds[lnum]
+        echo printf("%3s %2s %3s %-9.9s %-9.9s %3s %2s %2s %2s %s",
+                    \ get(l:fold, 'lnum', '???'),
+                    \ get(l:fold.inside_line, 'lnum', '??'),
+                    \ get(l:fold.outside_line, 'lnum', '??'),
+                    \ get(l:fold, 'type', '???'),
+                    \ get(l:fold.parent, 'type', '???'),
+                    \ get(l:fold, 'level', '?'),
+                    \ get(l:fold, 'ignore', '?'),
+                    \ get(l:fold, 'min_lines', '?'),
+                    \ get(l:fold, 'max_level', '?'),
+                    \ get(l:fold.opening_line, 'text', '???'))
     endfor
 endfunction
 

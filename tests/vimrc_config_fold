@@ -3,12 +3,32 @@ Plug '~/hacking/projects/vim-coiled-snake'
 Plug 'Konfekt/FastFold'
 call plug#end()
 
-set foldcolumn=3
+set foldcolumn=5
+set number
 
 function! g:CoiledSnakeConfigureFold(fold)
+
+    " Don't fold nested classes.
     if a:fold.type == 'class'
         let a:fold.max_level = 1
+
+    " Don't fold nested functions, but do fold methods (i.e. functions
+    " nested inside classes).
     elseif a:fold.type == 'function'
-        let a:fold.max_level = 2
+        let a:fold.max_level = 1
+        if get(a:fold.parent, 'type') == 'class'
+            let a:fold.max_level = 2
+        endif
+
+    " Only fold imports if there are at least 3 of them.
+    elseif a:fold.type == 'import'
+        let a:fold.min_lines = 3
     endif
+
+    " If the whole program is shorter than 30 lines, don't fold 
+    " anything.
+    if line('$') < 30
+        let a:fold.ignore = 1
+    endif
+
 endfunction
