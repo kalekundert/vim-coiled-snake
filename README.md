@@ -83,12 +83,11 @@ No configuration is necessary, but the following options are available:
 - ``g:CoiledSnakeConfigureFold(fold)``
 
   This function is called on each automatically-identified fold to customize 
-  how it should behave. The argument is a ``Fold`` object, which describes the 
-  fold (e.g. what line did it start on, how indented is it, etc.) and how it 
-  should behave  (e.g. whether it should be folded at all, where it should 
-  start and end, how trailing blank lines should be handled, etc.).  Inside the 
-  function, you can do a lot to control how the code is folded by interacting 
-  with this object.
+  how it should behave. The argument is a ``Fold`` object, which describes all 
+  aspects of the fold in question (e.g. where does it start and end, is it 
+  nested in another fold, should it be folded at all, how should trailing blank 
+  lines be handled, etc).  By interacting with this object, you can do a lot to 
+  control how the code is folded.
   
   The best way to illustrate this is with an example:
 
@@ -99,31 +98,30 @@ No configuration is necessary, but the following options are available:
               let a:fold.max_level = 1
       
           " Don't fold nested functions, but do fold methods (i.e. functions 
-          " nested inside classes).
+          " nested inside a class).
           elseif a:fold.type == 'function'
               let a:fold.max_level = 1
               if get(a:fold.parent, 'type') == 'class'
                   let a:fold.max_level = 2
               endif
       
-          " Only fold imports if there are at least 3 of them.
+          " Only fold imports if there are 3 or more of them.
           elseif a:fold.type == 'import'
               let a:fold.min_lines = 3
           endif
       
-          " If the whole program is shorter than 30 lines, don't fold 
-          " anything.
+          " Don't fold anything if the whole program is shorter than 30 lines.
           if line('$') < 30
               let a:fold.ignore = 1
           endif
       
       endfunction
 
-    By default, import blocks will only be folded if they are 4 lines or 
-    longer, class blocks will collapse up to 2 trailing blank lines, function 
-    blocks will collapse up to 1 trailing blank line, and data structure blocks 
-    (e.g. literal lists, dicts, sets) will only be folded if they are 
-    unindented and longer than 6 lines.
+    By default, import blocks are only folded if they are 4 lines or longer, 
+    class blocks collapse up to 2 trailing blank lines, function blocks 
+    collapse up to 1 trailing blank line, and data structure blocks (e.g. 
+    literal lists, dicts, sets) are only folded if they are unindented and 
+    longer than 6 lines.
 
   ``Fold`` object attributes:
 
