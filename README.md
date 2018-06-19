@@ -74,11 +74,11 @@ No configuration is necessary, but the following options are available:
 
 - ``g:coiled_snake_set_foldtext``
     
-  If false, don't change the algorithm for labeling folds.
+  If false, don't load the algorithm for labeling folds.
 
 - ``g:coiled_snake_set_foldexpr``
 
-  If false, don't change the algorithm for making folds.
+  If false, don't load the algorithm for making folds.
 
 - ``g:CoiledSnakeConfigureFold(fold)``
 
