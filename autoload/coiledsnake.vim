@@ -338,9 +338,6 @@ function! s:InitLine(lnum, state) abort "{{{1
                         \ matchlist(line.text, s:string_start_pattern)[1]
         endif
 
-    elseif line.text =~# s:comment_pattern
-        let line.is_code = 0
-
     " Also keep track of blank lines, which can affect where folds end.
 
     elseif line.text =~# s:blank_pattern
