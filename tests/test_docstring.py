@@ -1,3 +1,5 @@
+""" """
+
 """
 """
 
@@ -19,6 +21,7 @@ Lorem ipsum
 dolor sit amet
 """
 
+''' '''
 
 '''
 '''
@@ -40,3 +43,8 @@ Lorem ipsum
 
 dolor sit amet
 '''
+
+# Don't get confused by mismatched delimiters.
+"""
+'''
+"""

@@ -10,7 +10,6 @@ let s:decorator_pattern = '^\s*@'
 let s:string_start_pattern = '[bBfFrRuU]\{0,2}\(''''''\|"""\)\\\?'
 let s:string_start_end_pattern = s:string_start_pattern . '.*\1'
 let s:docstring_pattern = '^\s*' . s:string_start_pattern
-let s:docstring_close_pattern = '\(''''''\|"""\)'
 let s:data_struct_pattern = '^\s*[a-zA-Z0-9_.]\+ = \({\|\[\|(\|'.s:string_start_pattern.'\)\s*$'
 let s:data_struct_close_pattern = '^\s*\(}\|\]\|)\|''''''\|"""\)$'
 let s:manual_open_pattern = '^\s*##'
@@ -402,10 +401,12 @@ function! s:InitFold(line) abort "{{{1
         let fold.max_level = 1
         let fold.min_lines = 6
 
-    elseif a:line.text =~# s:docstring_pattern
+    elseif a:line.text =~# s:docstring_pattern 
+                \ && a:line.text !~# s:string_start_end_pattern
+
         let fold.type = 'doc'
         let fold.FindClosingInfo = function('s:CloseOnPattern')
-        let fold.close_pattern = s:docstring_close_pattern
+        let fold.close_pattern = matchlist(a:line.text, s:docstring_pattern)[1]
     endif
 
     return fold
