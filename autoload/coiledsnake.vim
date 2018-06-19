@@ -178,14 +178,14 @@ function! coiledsnake#DebugLines() abort "{{{1
         return
     endif
 
-    echo "#   Code? Blank? Level Text"
+    echo "#   Code? Blank? Indent Text"
     for lnum in range(0, len(lines)-1)
         let line = lines[lnum]
-        echo printf("%3s %5s %6s %5s %s",
+        echo printf("%3s %5s %6s %6s %s",
                     \ get(line, 'lnum', '???'),
                     \ get(line, 'is_code', '?'),
                     \ get(line, 'is_blank', '?'),
-                    \ get(line, 'fold_level', '?'),
+                    \ get(line, 'indent', '?'),
                     \ get(line, 'text', '???'))
     endfor
 endfunction
@@ -231,29 +231,10 @@ endfunction
 function! s:LinesFromBuffer() abort "{{{1
     let lines = []
     let state = {'lines': lines}
-    let indent_unit = -1
 
     for lnum in range(1, line('$'))
         let line = s:InitLine(lnum, state)
-
-        " Deduce the indent level from the code.  This will break if indent 
-        " levels vary throughout the code (which is legal python), but I don't 
-        " think there's much we can do about that.
-        if line.is_code && line.indent > 0
-            if line.indent < indent_unit || indent_unit < 0
-                let indent_unit = line.indent
-            endif
-        endif
-
         call add(lines, line)
-    endfor
-
-    if indent_unit < 0
-        let indent_unit = &shiftwidth
-    endif
-
-    for line in lines
-        let line.fold_level = line.indent / indent_unit + 1
     endfor
 
     return lines
@@ -262,6 +243,7 @@ endfunction
 function! s:FoldsFromLines(lines) abort "{{{1
     let candidate_folds = {}
     let folds = {}
+    let levels = {}
 
     " Create a data structure for each possible fold.
     for line in a:lines
@@ -270,6 +252,8 @@ function! s:FoldsFromLines(lines) abort "{{{1
             let candidate_folds[l:fold.lnum] = l:fold
         endif
     endfor
+
+    echo candidate_folds
 
     " Remove folds that don't meet certain criteria (e.g. number of lines, 
     " level of indentation, etc.) or have been ignored for some reason (e.g. in 
@@ -286,6 +270,15 @@ function! s:FoldsFromLines(lines) abort "{{{1
         " after all the folds have been loaded, so that earlier folds can 
         " supercede later ones.
         call l:fold.FindClosingInfo(a:lines, candidate_folds)
+
+        " Note which lines are included in this fold, so that folds can be 
+        " nested correctly.  Initially the nesting was based on indentation, 
+        " but this lead to fold levels getting skipped, e.g. if you define a 
+        " function in a for-loop.
+        let l:fold.level = get(levels, l:fold.lnum, 0) + 1
+        for lnum in range(l:fold.lnum + 1, l:fold.InsideLnumOrEOF())
+            let levels[lnum] = l:fold.level
+        endfor
 
         " Give the user a chance to configure the fold, e.g. set the max size 
         " or level, decide to ignore it for any reason, etc.
@@ -316,7 +309,6 @@ function! s:InitLine(lnum, state) abort "{{{1
     let line.lnum = a:lnum
     let line.text = getline(a:lnum)
     let line.indent = indent(a:lnum)
-    let line.fold_level = -1
     let line.is_code = 1
     let line.is_blank = 0
 
@@ -353,7 +345,7 @@ function! s:InitFold(line) abort "{{{1
     let fold = {}
     let fold.type = ""
     let fold.lnum = a:line.lnum
-    let fold.level = a:line.fold_level
+    let fold.level = -1
     let fold.ignore = a:line.text =~# s:manual_ignore_pattern
     let fold.min_lines = 0
     let fold.max_level = -1
@@ -367,6 +359,14 @@ function! s:InitFold(line) abort "{{{1
         let l:open = self.opening_line.lnum
         let l:close = get(self.inside_line, 'lnum', line('$'))
         return l:close - l:open + 1
+    endfunction
+
+    function! fold.InsideLnumOrEOF()
+        if self.inside_line == {}
+            return line('$')
+        else
+            return self.inside_line.lnum
+        endif
     endfunction
 
     if ! a:line.is_code
@@ -501,7 +501,7 @@ function! s:CloseBlock(lines, folds) abort dict "{{{1
         " The outside line is the first line (excluding blanks, comments, and 
         " multiline strings) with an indent level equal to or lesser than the 
         " line that opened the fold.
-        if line.is_code && line.fold_level <= self.level
+        if line.is_code && line.indent <= self.opening_line.indent
             let self.inside_line = inside_line
             let self.outside_line = line
             return
