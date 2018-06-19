@@ -38,7 +38,7 @@ Clone this repository into your ``.vim/bundle`` directory:
 
     cd ~/.vim/bundle
     git clone git://github.com/kalekundert/vim-coiled-snake.git
-    git clone git://github.com/Konfect/FastFold
+    git clone git://github.com/Konfekt/FastFold
 
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
@@ -46,7 +46,7 @@ Put the following line(s) in the ``call plug#begin()`` section of your ``.vimrc`
 file:
 
     Plug 'kalekundert/vim-coiled-snake'
-    Plug 'Konfect/FastFold'
+    Plug 'Konfekt/FastFold'
 
 Usage
 -----
