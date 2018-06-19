@@ -232,10 +232,29 @@ endfunction
 function! s:LinesFromBuffer() abort "{{{1
     let lines = []
     let state = {'lines': lines}
+    let indent_unit = -1
 
     for lnum in range(1, line('$'))
         let line = s:InitLine(lnum, state)
+
+        " Deduce the indent level from the code.  This will break if indent 
+        " levels vary throughout the code (which is legal python), but I don't 
+        " think there's much we can do about that.
+        if line.is_code && line.indent > 0
+            if line.indent < indent_unit || indent_unit < 0
+                let indent_unit = line.indent
+            endif
+        endif
+
         call add(lines, line)
+    endfor
+
+    if indent_unit < 0
+        let indent_unit = &shiftwidth
+    endif
+
+    for line in lines
+        let line.fold_level = line.indent / indent_unit + 1
     endfor
 
     return lines
@@ -298,7 +317,7 @@ function! s:InitLine(lnum, state) abort "{{{1
     let line.lnum = a:lnum
     let line.text = getline(a:lnum)
     let line.indent = indent(a:lnum)
-    let line.fold_level = line.indent / &shiftwidth + 1
+    let line.fold_level = -1
     let line.is_code = 1
     let line.is_blank = 0
 
