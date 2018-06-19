@@ -97,11 +97,12 @@ No configuration is necessary, but the following options are available:
           if a:fold.type == 'class'
               let a:fold.max_level = 1
 
-          " Don't fold doubly nested functions, and include up to 2 
-          " trailing blank lines in function folds.
+          " Fold methods, but not nested functions.
           elseif a:fold.type == 'function'
-              let a:fold.max_level = 2
-              let a:fold.num_blanks_below = 2
+              if a:fold.parent.type == 'class':
+                  let a:fold.max_level = 2
+              else:
+                  let a:fold.max_level = 2
 
           " Only fold imports if there are at least 5 of them.
           elseif a:fold.type == 'import'
@@ -120,6 +121,9 @@ No configuration is necessary, but the following options are available:
   - ``type`` (str, read-only): The kind of lines being folded.  The following 
     values are possible: ``'import'``, ``'decorator'``, ``'class'``, 
     ``'function'``, ``'struct'``, ``'docstring'``.
+
+  - ``parent`` (Fold, read-only): The fold containing this one, or ``{}`` if 
+    this is a top level fold.
 
   - ``lnum`` (int, read-only): The line number (1-indexed) of the first line in 
     the fold.

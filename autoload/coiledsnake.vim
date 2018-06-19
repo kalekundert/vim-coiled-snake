@@ -243,7 +243,7 @@ endfunction
 function! s:FoldsFromLines(lines) abort "{{{1
     let candidate_folds = {}
     let folds = {}
-    let levels = {}
+    let parents = {}
 
     " Create a data structure for each possible fold.
     for line in a:lines
@@ -252,8 +252,6 @@ function! s:FoldsFromLines(lines) abort "{{{1
             let candidate_folds[l:fold.lnum] = l:fold
         endif
     endfor
-
-    echo candidate_folds
 
     " Remove folds that don't meet certain criteria (e.g. number of lines, 
     " level of indentation, etc.) or have been ignored for some reason (e.g. in 
@@ -275,9 +273,10 @@ function! s:FoldsFromLines(lines) abort "{{{1
         " nested correctly.  Initially the nesting was based on indentation, 
         " but this lead to fold levels getting skipped, e.g. if you define a 
         " function in a for-loop.
-        let l:fold.level = get(levels, l:fold.lnum, 0) + 1
+        let l:fold.parent = get(parents, l:fold.lnum, {})
+        let l:fold.level = get(l:fold.parent, 'level', 0) + 1
         for lnum in range(l:fold.lnum + 1, l:fold.InsideLnumOrEOF())
-            let levels[lnum] = l:fold.level
+            let parents[lnum] = l:fold
         endfor
 
         " Give the user a chance to configure the fold, e.g. set the max size 
@@ -343,6 +342,7 @@ endfunction
 
 function! s:InitFold(line) abort "{{{1
     let fold = {}
+    let fold.parent = {}
     let fold.type = ""
     let fold.lnum = a:line.lnum
     let fold.level = -1
