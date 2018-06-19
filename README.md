@@ -173,7 +173,7 @@ No configuration is necessary, but the following options are available:
     it.  The lines between ``inside_line`` and ``outside_line`` are typically 
     blank, and may be added to the fold depending on the value of the 
     ``num_lines_below`` attribute.  May be ``{}``, in which case the fold will 
-    end on ``inside_line``.  the ``num_lines_below`` option 
+    end on ``inside_line``.
 
   ``Line`` object attributes:
 
