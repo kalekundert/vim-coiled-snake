@@ -381,6 +381,7 @@ function! s:InitFold(line) abort "{{{1
         let fold.type = 'struct'
         let fold.FindClosingInfo = function('s:CloseDataStructure')
         let fold.max_level = 1
+        let fold.min_lines = 6
 
     elseif a:line.text =~# s:docstring_pattern
         let fold.type = 'doc'
