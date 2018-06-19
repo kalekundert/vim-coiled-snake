@@ -304,8 +304,8 @@ function! s:InitLine(lnum, state) abort "{{{1
 
     " Work out which lines are in comments or multiline strings and mark them 
     " as being 'not code'.  These need to be (largely) ignored by the folding 
-    " machinery, since they could contain anything but don't affect the 
-    " structure of the code.
+    " machinery, since they could contain anything but shouldn't affect the 
+    " structure of the folds.
 
     if has_key(a:state, 'multiline_string_start')
         let line.is_code = 0
@@ -339,13 +339,13 @@ function! s:InitFold(line) abort "{{{1
     let fold.type = ""
     let fold.lnum = a:line.lnum
     let fold.level = a:line.fold_level
+    let fold.ignore = a:line.text =~# s:manual_ignore_pattern
+    let fold.min_lines = 0
+    let fold.max_level = -1
+    let fold.num_blanks_below = 0
     let fold.opening_line = a:line
     let fold.inside_line = {}   " The last line that should be in the fold.
     let fold.outside_line = {}  " The first line that shouldn't be in the fold.
-    let fold.num_blanks_below = 0
-    let fold.min_lines = 0
-    let fold.max_level = -1
-    let fold.ignore = a:line.text =~# s:manual_ignore_pattern
     let fold.FindClosingInfo = function('s:UndefinedClosingLine')
 
     function! fold.NumLines()
