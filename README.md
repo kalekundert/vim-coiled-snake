@@ -82,14 +82,15 @@ No configuration is necessary, but the following options are available:
 
 - ``g:CoiledSnakeConfigureFold(fold)``
 
-  This is a function that is called to customize how folds are made.  The 
-  argument is a ``Fold`` object, which describes the fold (e.g. what line did 
-  it start on, how indented is it, etc.) and how it should behave  
-  (e.g. whether it should be folded at all, where it should start and end, 
-  how trailing blank lines should be handled, etc.).  The purpose of this 
-  function is to inspect the given fold and to change any settings you'd like.
+  This function is called on each automatically-identified fold to customize 
+  how it should behave. The argument is a ``Fold`` object, which describes the 
+  fold (e.g. what line did it start on, how indented is it, etc.) and how it 
+  should behave  (e.g. whether it should be folded at all, where it should 
+  start and end, how trailing blank lines should be handled, etc.).  Inside the 
+  function, you can do a lot to control how the code is folded by interacting 
+  with this object.
   
-  The best way to illustrate how this works is with an example:
+  The best way to illustrate this is with an example:
 
       function! g:CoiledSnakeConfigureFold(fold)
       
