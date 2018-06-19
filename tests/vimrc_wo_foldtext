@@ -1,10 +1,4 @@
-call plug#begin()
-Plug '~/hacking/projects/vim-coiled-snake'
-Plug 'Konfekt/FastFold'
-call plug#end()
-
-set foldcolumn=5
-set number
+source vimrc
 
 let g:coiled_snake_set_foldtext = 0
 

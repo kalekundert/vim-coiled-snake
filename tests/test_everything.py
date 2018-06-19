@@ -9,6 +9,7 @@ from bar import baz
 from qux import quz
 
 class Class:
+    """ Doc """
 
     class NestedClass:
         pass

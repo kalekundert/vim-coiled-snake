@@ -72,13 +72,20 @@ Configuration
 -------------
 No configuration is necessary, but the following options are available:
 
-- ``g:coiled_snake_set_foldtext``
+- ``g:coiled_snake_set_foldtext`` (default: ``1``)
     
   If false, don't load the algorithm for labeling folds.
 
-- ``g:coiled_snake_set_foldexpr``
+- ``g:coiled_snake_set_foldexpr`` (default: ``1``)
 
   If false, don't load the algorithm for making folds.
+
+- ``g:coiled_snake_foldtext_flags`` (default: ``['doc', 'static']``)
+
+  A list of the annotations (if any) you want to appear in the fold summaries. 
+  The following values are understood:
+  - ``'doc'``: Documented classes and functions.
+  - ``'static'``: Static and class methods.
 
 - ``g:CoiledSnakeConfigureFold(fold)``
 

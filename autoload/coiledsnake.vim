@@ -103,11 +103,17 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
     " will be left-justified, while the flags will be concatenated together and 
     " right-justified.
 
+    function! AddBuiltinFlag(flag, condition) closure
+        if a:condition && index(g:coiled_snake_foldtext_flags, a:flag) >= 0
+            call add(flags, a:flag)
+        endif
+    endfunction
+
     if focus.text =~# s:block_pattern
         let fields = split(focus.text, '#')
         let next_line = getline(a:foldstart + focus.offset + 1)
 
-        " Tags are taken to be parenthetical phrases found within an inline
+        " Flags are taken to be parenthetical phrases found within an inline
         " comment.  Line that don't have an inline comment can be trivially 
         " processed, so this case is handled specially.
 
@@ -120,9 +126,8 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
             let flags = filter(flags[1:], 'v:val != ""')
         endif
 
-        if next_line =~# s:docstring_pattern
-            call add(flags, "doc")
-        endif
+        call AddBuiltinFlag("doc", next_line =~# s:docstring_pattern)
+        call AddBuiltinFlag("static", get(focus, 'is_static'))
 
     else
         let title = focus.text
@@ -131,13 +136,13 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
 
     " Format a succinct fold message.  The title is stripped of whitespace and 
     " truncated, if it is too long to fit on the screen.  The total number of 
-    " folded lines are added as an extra tag, and all the flags are wrapped in 
+    " folded lines are added as an extra flag, and all the flags are wrapped in 
     " parenthesis.
 
     let flags = add(flags, 1 + a:foldend - a:foldstart)
     let status = '(' . join(flags, ') (') . ')'
 
-    let cutoff = &columns - strlen(status)
+    let cutoff = s:BufferWidth() - strlen(status)
     let title = substitute(title, '^\(.\{-}\)\s*$', '\1', '')
     
     if strlen(title) >= cutoff
@@ -155,6 +160,7 @@ endfunction
 function! coiledsnake#loadSettings() abort "{{{1
     call s:SetIfUndef('g:coiled_snake_set_foldexpr', 1)
     call s:SetIfUndef('g:coiled_snake_set_foldtext', 1)
+    call s:SetIfUndef('g:coiled_snake_foldtext_flags', ['doc', 'static'])
 endfunction
 
 function! coiledsnake#EnableFoldText() abort "{{{1
@@ -536,8 +542,13 @@ endfunction
 function! s:FindDecoratorTitle(focus, foldstart, foldend) abort "{{{1
     " Step through the fold line-by-line looking for a class or function 
     " definition.
-    for offset in range(1, a:foldend - a:foldstart)
+    for offset in range(0, a:foldend - a:foldstart)
         let line = getline(a:foldstart + offset)
+
+        " We might want to label static methods.
+        if line =~# s:decorator_pattern . '\(staticmethod\|classmethod\)'
+            let a:focus.is_static = 1
+        endif
 
         if line =~# s:block_pattern
             let a:focus.text = line
@@ -569,3 +580,11 @@ function! s:FindDocstringTitle(focus, foldstart, foldend) abort "{{{1
     endfor
 endfunction
 
+function! s:BufferWidth() abort "{{{1
+    redir =>a | exe "silent sign place buffer=".bufnr('') | redir end
+    let signlist = split(a, '\n')
+    return winwidth(0)
+                \ - &foldcolumn
+                \ - ((&number || &relativenumber) ? &numberwidth : 0)
+                \ - (len(signlist) > 2 ? 2 : 0)
+endfunction
