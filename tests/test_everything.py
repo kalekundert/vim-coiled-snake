@@ -14,16 +14,13 @@ class Class:
     class NestedClass:
         pass
 
-
     def method():
         def nested_method():
             pass
 
-
     @decorator
     def decoratee():
         pass
-
 
 def function():
     code = 0

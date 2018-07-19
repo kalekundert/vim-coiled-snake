@@ -149,18 +149,20 @@ No configuration is necessary, but the following options are available:
     will not be created. 
 
   - ``max_indent`` (int): If the fold would be more indented than this, it will 
-    not be created.
+    not be created.  This option is ignored if it's less than or equal to 0.
 
   - ``max_level`` (int): If the fold would have a higher level than this, it 
-    will not be created.  This is subtly different than ``max_indent``.  For 
-    example, consider a function defined in a for-loop.  Because the loop 
-    isn't folded, the level isn't affected while the indent is.
+    will not be created.  This option is ignored if it's less than or equal to 
+    0.  Note that this is subtly different than ``max_indent``.  For example, 
+    consider a function defined in a for-loop.  Because the loop isn't folded, 
+    the level isn't affected while the indent is.
 
   - ``ignore`` (bool): If true, the fold will not be created.
 
   - ``num_blanks_below`` (int): The number of trailing blank lines to include 
-    in the fold.  Only the ``'decorator'``, ``'class'``, and ``'function'`` 
-    types of fold respect this option.
+    in the fold, if the next fold follows immediately after and is of the same 
+    type and level as this one.  This is useful for collapsing the blank space 
+    between classes and methods.
 
   - ``NumLines()`` (int, read-only): A method that returns the minimum number 
     of lines that will be included in the fold, not counting any trailing blank 

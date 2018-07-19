@@ -50,16 +50,14 @@ function! coiledsnake#RefreshFolds() abort "{{{1
         if l:fold.inside_line == {}
             continue
 
-        " If an outside line was specified, allow the fold to include a certain 
-        " number of blank lines, so long as it doesn't encroach on the outside 
-        " line.
-        elseif l:fold.outside_line != {}
-            let buffer = 1 + !has_key(folds, l:fold.outside_line.lnum)
-            let closing_lnum = max([
-                    \ l:fold.inside_line.lnum,
-                    \ min([
-                        \ l:fold.inside_line.lnum + l:fold.num_blanks_below,
-                        \ l:fold.outside_line.lnum - buffer])])
+        " If this fold and the next are the same type and separated only by 
+        " blank lines, allow a certain number of those lines to be included in 
+        " the fold.
+        elseif l:fold.type == get(l:fold.next_fold, 'type', '')
+                    \ && l:fold.level == get(l:fold.next_fold, 'level')
+            let closing_lnum = min([
+                    \ l:fold.inside_line.lnum + l:fold.num_blanks_below,
+                    \ l:fold.outside_line.lnum])
 
         " If only an inside line was specified, close the fold exactly on that 
         " line.
@@ -259,6 +257,8 @@ function! s:FoldsFromLines(lines) abort "{{{1
     let candidate_folds = {}
     let folds = {}
     let parents = {}
+    let prev_fold = {}
+    let prev_fold_by_level = {}
 
     " Create a data structure for each possible fold.
     for line in a:lines
@@ -286,7 +286,7 @@ function! s:FoldsFromLines(lines) abort "{{{1
 
         " Note which lines are included in this fold, so that folds can be 
         " nested correctly.  Initially the nesting was based on indentation, 
-        " but this lead to fold levels getting skipped, e.g. if you define a 
+        " but this led to fold levels getting skipped, e.g. if you define a 
         " function in a for-loop.
         let l:fold.parent = get(parents, l:fold.lnum, {})
         let l:fold.level = get(l:fold.parent, 'level', 0) + 1
@@ -317,6 +317,16 @@ function! s:FoldsFromLines(lines) abort "{{{1
         endif
 
         let folds[l:fold.lnum] = l:fold
+    endfor
+
+    " Make note of consecutive folds.  Blank lines may be collapsed bweteen 
+    " consecutive folds of the same type.
+    for lnum in sort(keys(folds), 'N')
+        let l:fold = folds[lnum]
+        let l:fold.next_fold = get(
+                    \ folds,
+                    \ get(l:fold.outside_line, 'lnum'),
+                    \ {})
     endfor
 
     return folds
@@ -373,6 +383,7 @@ function! s:InitFold(line) abort "{{{1
     let fold.opening_line = a:line
     let fold.inside_line = {}   " The last line that should be in the fold.
     let fold.outside_line = {}  " The first line that shouldn't be in the fold.
+    let fold.next_fold = {}
     let fold.FindClosingInfo = function('s:UndefinedClosingLine')
 
     function! fold.NumLines()
@@ -495,6 +506,7 @@ function! s:CloseDecorator(lines, folds) abort dict "{{{1
         " Copy some settings over from the block we're decorating.
         if l:fold.type == 'function' || l:fold.type == 'class'
             call l:fold.FindClosingInfo(a:lines, a:folds)
+            let self.type = l:fold.type
             let self.inside_line = l:fold.inside_line
             let self.outside_line = l:fold.outside_line
             let self.num_blanks_below = l:fold.num_blanks_below

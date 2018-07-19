@@ -20,6 +20,13 @@ class Foo:
     def baz():
         pass
 
+    code = 2
 
 class Bar:
     pass
+
+
+class Baz:
+    pass
+
+code = 1
