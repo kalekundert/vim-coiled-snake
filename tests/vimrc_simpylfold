@@ -1,0 +1,8 @@
+call plug#begin()
+Plug 'tmhedberg/SimpylFold'
+Plug 'Konfekt/FastFold'
+call plug#end()
+
+set foldcolumn=5
+set number
+
