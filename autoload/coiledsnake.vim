@@ -375,6 +375,7 @@ function! s:InitFold(line) abort "{{{1
     let fold.type = ""
     let fold.lnum = a:line.lnum
     let fold.level = -1
+    let fold.indent = a:line.indent
     let fold.ignore = a:line.text =~# s:manual_ignore_pattern
     let fold.min_lines = 0
     let fold.max_indent = -1

@@ -142,6 +142,8 @@ No configuration is necessary, but the following options are available:
   - ``lnum`` (int, read-only): The line number (1-indexed) of the first line in 
     the fold.
 
+  - ``indent`` (int, read-only): The indent on the first line of the fold.
+
   - ``level`` (int, read-only): How nested the fold is, where 1 indicates 
     no nesting.  This is based on the indent of the first line in the fold.
 
