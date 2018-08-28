@@ -229,7 +229,7 @@ endfunction
 function! coiledsnake#DebugText() abort "{{{1
     echo "#    Line"
     for lnum in range(1, line('$'))
-        echo FoldText(lnum, lnum+1)
+        echo coiledsnake#FormatText(lnum, lnum+1)
     endfor
 endfunction
 
@@ -602,10 +602,20 @@ function! s:FindDocstringTitle(focus, foldstart, foldend) abort "{{{1
 endfunction
 
 function! s:BufferWidth() abort "{{{1
+    " The `:sign place` output contains two header lines.
+    " The sign column is fixed at two columns, if present.
     redir =>a | exe "silent sign place buffer=".bufnr('') | redir end
     let signlist = split(a, '\n')
+
+    " If there are line numbers, the `&numberwidth` setting defines their 
+    " minimum width.  But we also have to check how many lines are in the file, 
+    " because the actual width will be large enough to accomodate the biggest 
+    " number. 
+    let lineno_cols = max([&numberwidth, strlen(line('$')) + 1])
+
     return winwidth(0)
                 \ - &foldcolumn
-                \ - ((&number || &relativenumber) ? &numberwidth : 0)
+                \ - ((&number || &relativenumber) ? lineno_cols : 0)
                 \ - (len(signlist) > 2 ? 2 : 0)
+
 endfunction
