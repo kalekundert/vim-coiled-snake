@@ -1,0 +1,102 @@
+call plug#begin()
+Plug 'tpope/vim-unimpaired'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-sleuth'
+Plug 'justinmk/vim-sneak'
+Plug 'tpope/vim-dispatch', { 'branch' : 'job' }
+" Plug 'yuttie/comfortable-motion.vim'
+Plug 'junegunn/vim-peekaboo'
+
+" Folding and sessions
+" Plug 'farmergreg/vim-lastplace'
+Plug 'kopischke/vim-stay'
+Plug 'kalekundert/vim-coiled-snake'
+Plug 'Konfekt/FastFold'
+
+" Browsing, file management and navigation
+Plug 'mhinz/vim-startify'
+
+if !executable('fzf')
+  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
+endif
+Plug 'junegunn/fzf.vim'
+Plug 'Alok/notational-fzf-vim'
+Plug '~/dev/vim/vim-cards'
+Plug 'mhinz/vim-grepper'
+
+Plug 'francoiscabrol/ranger.vim'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'tmux-plugins/vim-tmux-focus-events'
+Plug 'roxma/vim-tmux-clipboard'
+Plug 'vimwiki/vimwiki'
+Plug 'johnsyweb/vim-makeshift'
+Plug 'tpope/vim-eunuch'
+Plug 'scrooloose/nerdtree'
+
+Plug 'mkitt/tabline.vim'
+Plug 'majutsushi/tagbar'
+
+Plug 'mtth/scratch.vim'
+
+" Editing
+Plug 'junegunn/goyo.vim'
+Plug 'junegunn/limelight.vim'
+Plug 'mbbill/undotree'
+Plug 'tpope/vim-commentary'
+Plug 'godlygeek/tabular'
+Plug 'arecarn/vim-crunch'
+Plug 'tpope/vim-surround'
+Plug 'andymass/vim-matchup'
+" Plug 'mg979/vim-yanktools'
+Plug 'tpope/vim-endwise'
+
+" Source control
+Plug 'tpope/vim-fugitive'
+Plug 'junegunn/gv.vim'
+Plug 'tpope/vim-rhubarb'
+Plug 'mhinz/vim-signify'
+
+" Completion
+" Plug 'lifepillar/vim-mucomplete'
+" Plug 'davidhalter/jedi-vim'
+Plug 'SirVer/ultisnips'
+  Plug 'honza/vim-snippets'
+
+Plug 'Shougo/deoplete.nvim', { 'do' : ':UpdateRemotePlugins' }
+Plug 'roxma/nvim-yarp'
+Plug 'roxma/vim-hug-neovim-rpc'
+" Plug 'tweekmonster/deoplete-clang2'
+" Plug 'Rip-Rip/clang_complete'
+Plug 'zchee/deoplete-jedi'
+Plug 'zchee/deoplete-clang'
+
+" Plug 'Shougo/deoplete-clangx'
+Plug 'Shougo/neoinclude.vim'
+
+
+" Languages and filetypes
+Plug 'vim-syntastic/syntastic'
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'tpope/vim-apathy'
+
+Plug 'lervag/vimtex'
+Plug 'gauteh/vim-evince-synctex'
+Plug 'adborden/vim-notmuch-address'
+Plug 'jamessan/vim-gnupg'
+" Plug '~/dev/vim/evince-synctex'
+
+" Color schemes and themeing
+Plug 'joshdick/onedark.vim'
+Plug 'romainl/Apprentice'
+Plug 'rakr/vim-one'
+Plug 'endel/vim-github-colorscheme'
+Plug 'reedes/vim-colors-pencil'
+Plug 'nanotech/jellybeans.vim'
+Plug 'roosta/vim-srcery'
+Plug 'tyrannicaltoucan/vim-quantum'
+
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+
+call plug#end()

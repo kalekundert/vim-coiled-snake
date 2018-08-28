@@ -358,6 +358,14 @@ function! s:InitLine(lnum, state) abort "{{{1
                         \ matchlist(line.text, s:string_start_pattern)[1]
         endif
 
+
+    " Specially handle the case where a long argument list is ended on it's own 
+    " line at the same indentation level as the `def` keyword.  This is the 
+    " style enforced by the Black formatter, see issue #4.
+
+    elseif line.text =~# '^\s*):'
+      let line.is_code = 0
+
     " Also keep track of blank lines, which can affect where folds end.
 
     elseif line.text =~# s:blank_pattern
