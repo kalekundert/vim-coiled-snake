@@ -4,7 +4,7 @@ let s:comment_pattern = '^\s*#'
 let s:import_pattern = '^\(import\|from\)'
 let s:import_continue_pattern = join([s:import_pattern, s:blank_pattern, s:comment_pattern], '\|')
 let s:class_pattern = '^\s*class\s'
-let s:function_pattern = '^\s*\(def\s\|if __name__\s==\)'
+let s:function_pattern = '^\s*\(\(async\s\+\)\?def\s\|if __name__\s==\)'
 let s:block_pattern = join([s:class_pattern, s:function_pattern], '\|')
 let s:decorator_pattern = '^\s*@'
 let s:string_start_pattern = '[bBfFrRuU]\{0,2}\(''''''\|"""\)\\\?'
