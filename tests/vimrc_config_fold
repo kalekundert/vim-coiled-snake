@@ -10,7 +10,7 @@ function! g:CoiledSnakeConfigureFold(fold)
     " nested inside classes).
     elseif a:fold.type == 'function'
         let a:fold.max_level = 1
-        if get(a:fold.parent, 'type') == 'class'
+        if get(a:fold.parent, 'type', '') == 'class'
             let a:fold.max_level = 2
         endif
 

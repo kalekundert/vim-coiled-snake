@@ -1,0 +1,13 @@
+call plug#begin()
+Plug '~/hacking/projects/vim-coiled-snake'
+call plug#end()
+
+function! g:CoiledSnakeConfigureFold(fold)
+  let is_class =  (a:fold.type == 'class')
+  let is_method = (a:fold.type == 'function' && get(a:fold.parent, 'type', '') == 'class')
+
+  if is_class || is_method
+    let a:fold.num_blanks_below = 0
+  endif
+
+endfunction

@@ -108,7 +108,7 @@ No configuration is necessary, but the following options are available:
           " nested inside a class).
           elseif a:fold.type == 'function'
               let a:fold.max_level = 1
-              if get(a:fold.parent, 'type') == 'class'
+              if get(a:fold.parent, 'type', '') == 'class'
                   let a:fold.max_level = 2
               endif
       
