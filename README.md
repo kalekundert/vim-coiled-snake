@@ -6,8 +6,8 @@ attractive and unobtrusive, (iii) to be robust to any kind of style or
 formatting, and (iv) to be highly configurable.  Here's what it looks like in 
 action:
 
-<p><a href="https://asciinema.org/a/Oof5vJDm9gDOZO0N3KEJJt6PT?autoplay=1">
-<img src="https://asciinema.org/a/Oof5vJDm9gDOZO0N3KEJJt6PT.png" width="500"/>
+<p><a href="https://asciinema.org/a/234369?autoplay=1">
+<img src="https://asciinema.org/a/234369.png" width="500"/>
 </a></p>
 
 A couple features are worth drawing attention to:
