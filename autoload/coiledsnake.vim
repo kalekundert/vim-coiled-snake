@@ -363,7 +363,7 @@ function! s:InitLine(lnum, state) abort "{{{1
     " line at the same indentation level as the `def` keyword.  This is the 
     " style enforced by the Black formatter, see issue #4.
 
-    elseif line.text =~# '^\s*)'
+    elseif line.text =~# '^\s*)\(\s*->\s*\S\+\)\?\s*:'
       let line.is_code = 0
 
     " Also keep track of blank lines, which can affect where folds end.
