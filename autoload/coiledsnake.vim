@@ -356,14 +356,8 @@ function! s:InitLine(lnum, state) abort "{{{1
 
     elseif line.text =~# s:string_start_pattern
         if line.text !~# s:string_start_end_pattern
-            " For some reason, breaking this line with a backslash (i.e.  
-            " standard line continuation) breaks vim8, but not nvim.  See #11.  
-            " None of the other places I use line-continuation seem to cause 
-            " problems.  I was able to create a working minimal example of a 
-            " `let` statement with a continued line in vim8, so I don't know 
-            " what the problem is here.  But it's easy enough to just not break 
-            " the line.
-            let a:state.multiline_string_start = matchlist(line.text, s:string_start_pattern)[1]
+            let a:state.multiline_string_start = 
+                        \ matchlist(line.text, s:string_start_pattern)[1]
         endif
 
     " Identify lines that are continued from previous lines, e.g. if the 

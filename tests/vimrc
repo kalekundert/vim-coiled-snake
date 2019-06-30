@@ -1,3 +1,5 @@
+set cpoptions-=C
+
 call plug#begin()
 Plug '~/vim-coiled-snake'
 Plug 'Konfekt/FastFold'

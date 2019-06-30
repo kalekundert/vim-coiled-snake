@@ -211,6 +211,14 @@ No configuration is necessary, but the following options are available:
   - ``is_blank`` (bool, read-only): ``1`` if the line contains only whitespace, 
     ``0`` otherwise.
 
+Troubleshooting
+---------------
+- If docstrings don't seems to be folding properly, the problem may be that vim 
+  is running in vi-compatibility mode.  Coiled Snake does not work in this 
+  mode, and (for various reasons) docstrings are usually the first symptom.  
+  The solution is to either disable comptibility mode (`:set nocompatible`) or 
+  to specifically allow line continuation in vim scripts (`:set cpoptions-=C`).
+  
 Contributing
 ------------
 [Bug reports](https://github.com/kalekundert/vim-coiled-snake/issues) and [pull 
