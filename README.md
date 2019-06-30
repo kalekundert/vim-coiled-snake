@@ -48,21 +48,16 @@ file:
     Plug 'kalekundert/vim-coiled-snake'
     Plug 'Konfekt/FastFold'
 
-### vim 8 native plugins
+### [Vim8 native plugins](https://vimhelp.org/repeat.txt.html#packages)
 
-Clone the repository in the plugin start directory:
+Clone the repository into ``.vim/pack/*/start``:
 
     mkdir -p ~/.vim/pack/git-plugins/start
-    cd ~/.vim/pack/git-plugins/start && git clone git://github.com/kalekundert/vim-coiled-snake.git
+    cd ~/.vim/pack/git-plugins/start
+    git clone git://github.com/kalekundert/vim-coiled-snake.git
 
-Alternatively, you can optionaly activate it with the optional directory
-
-    mkdir -p ~/.vim/pack/git-plugins/opt
-    cd ~/.vim/pack/git-plugins/opt && git clone git://github.com/kalekundert/vim-coiled-snake.git
-
-And activate it in vim with:
-
-    :packadd vim-coiled-snake.git
+Note that you can name the directories in ``.vim/pack/`` whatever you like, so 
+the ``git-plugins`` name in the snippet above is just an example.
 
 Usage
 -----
