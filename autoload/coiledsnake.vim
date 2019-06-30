@@ -300,6 +300,8 @@ function! s:FoldsFromLines(lines) abort "{{{1
             call g:CoiledSnakeConfigureFold(l:fold)
         endif
 
+        " Duplicate check, in case the `ignore` flag was set by 
+        " `g:CoiledSnakeConfigureFold`.
         if l:fold.ignore
             continue
         endif
@@ -364,10 +366,21 @@ function! s:InitLine(lnum, state) abort "{{{1
             let a:state.multiline_string_start = matchlist(line.text, s:string_start_pattern)[1]
         endif
 
+    " Identify lines that are continued from previous lines, e.g. if the 
+    " previous line ended with a backslash.  I'd also like to include open 
+    " parentheses in this logic, but I'd have to find a way to make it robust 
+    " against parentheses in strings...
+
+    elseif has_key(a:state, 'continuation_backslash')
+        let line.is_code = 0
+        unlet a:state.continuation_backslash
+
+    elseif line.text =~# '\\$'
+        let a:state.continuation_backslash = 1
 
     " Specially handle the case where a long argument list is ended on it's own 
     " line at the same indentation level as the `def` keyword.  This is the 
-    " style enforced by the Black formatter, see issue #4.
+    " style enforced by the Black formatter, see issue #4, #8.
 
     elseif line.text =~# '^\s*)\(\s*->\s*\S\+\)\?\s*:'
       let line.is_code = 0
@@ -456,12 +469,12 @@ function! s:InitFold(line) abort "{{{1
 endfunction
 
 function! s:UndefinedClosingLine(lines, folds) abort dict "{{{1
-    " Return a dictionary containing the last line that should be part of the 
-    " fold (retval.inside_line) and (optionally) the first line that should be 
-    " not be part of it (retval.outside_line).  If this latter information is 
-    " provided, it may be used to include some extra lines in the fold (e.g. 
-    " blank lines between methods).  This is a virtual function that must be 
-    " defined for each type of fold (e.g. class, function, docstring, etc.) 
+    " Identify the last line that should be part of the fold (self.inside_line) 
+    " and (optionally) the first line that should be not be part of it 
+    " (self.outside_line).  If this latter information is provided, it may be 
+    " used to include some extra lines in the fold (e.g.  blank lines between 
+    " methods).  This is a virtual function that must be defined for each type 
+    " of fold (e.g. class, function, docstring, etc.) 
     throw printf("No algorithm given to end fold of type '%s'", self.type)
 endfunction
 
@@ -483,22 +496,35 @@ function! s:CloseImports(lines, folds) abort dict "{{{1
     " `self.lnum` is 1-indexed, indices into `lines` are 0-indexed.
     let ii = self.lnum - 1
     let self.inside_line = a:lines[ii]
+    let continuation_paren = 0
+    let continuation_backslash = 0
 
-    for jj in range(ii+1, len(a:lines)-1)
+    for jj in range(ii, len(a:lines)-1)
         let line = a:lines[jj]
 
-        if line.text =~# s:import_pattern
+        if continuation_paren
             let self.inside_line = line
-        endif
-        if line.text !~# s:import_continue_pattern
+            let continuation_paren = (line.text !~# ')')
+
+        elseif continuation_backslash 
+            let self.inside_line = line
+
+        elseif line.text =~# s:import_pattern
+            let self.inside_line = line
+            let continuation_paren = (line.text =~# '(')
+
+        elseif line.is_code && line.text !~# s:import_continue_pattern
             return
         endif
 
+        let continuation_backslash = (line.text =~# '\\$')
+
         " Without this, each import line will try to open a new fold.
-        if has_key(a:folds, line.lnum)
+        if jj != ii && has_key(a:folds, line.lnum)
             let a:folds[line.lnum].ignore = 1
         endif
     endfor
+
 endfunction
 
 function! s:CloseDecorator(lines, folds) abort dict "{{{1
@@ -625,3 +651,5 @@ function! s:BufferWidth() abort "{{{1
                 \ - (len(signlist) > 2 ? 2 : 0)
 
 endfunction
+
+" vim: ts=4 sts=4 sw=4
