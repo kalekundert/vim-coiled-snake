@@ -1,5 +1,5 @@
 call plug#begin()
-Plug '~/hacking/projects/vim-coiled-snake'
+Plug '~/vim-coiled-snake'
 Plug 'Konfekt/FastFold'
 call plug#end()
 

@@ -1,2 +1,3 @@
 #!/usr/bin/env sh
-vim -u vimrc "$@"
+DIR=$(dirname $0)
+HOME=$DIR/dummy_home vim -u $DIR/vimrc "$@"
