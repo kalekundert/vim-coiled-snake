@@ -218,6 +218,14 @@ Troubleshooting
   mode, and (for various reasons) docstrings are usually the first symptom.  
   The solution is to either disable comptibility mode (`:set nocompatible`) or 
   to specifically allow line continuation in vim scripts (`:set cpoptions-=C`).
+
+- If anything else seems broken, it may be that the code is crashing in the 
+  middle of making the folds.  Vim hides errors that occur during this process, 
+  so you might never know that the code is crashing.  To see these errors, run 
+  `:call coiledsnake#DebugFolds()` (if the problem is with the folds 
+  themselves) or `:call coiledsnake#DebugText()` (if the problem is with the 
+  fold labels).  If there are any errors, include that information in a [bug 
+  report](https://github.com/kalekundert/vim-coiled-snake/issues).
   
 Contributing
 ------------
