@@ -26,7 +26,7 @@ A couple features are worth drawing attention to:
 
 Installation
 ------------
-Coiled Snake is compatible with both ``vim`` and ``neovim``, and can be 
+Coiled Snake is compatible with both ``vim>=7.4`` and ``neovim``, and can be 
 installed using any of the plugin management tools out there.  I recommend 
 also installing the [FastFold](https://github.com/Konfekt/FastFold) plugin, 
 since I find that it makes folding more responsive and less finicky, but it's 
