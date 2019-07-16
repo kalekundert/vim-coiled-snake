@@ -39,7 +39,7 @@ function! coiledsnake#RefreshFolds() abort "{{{1
     let folds = s:FoldsFromLines(lines)
 
     " Cache where each fold should open and close.
-    for lnum in sort(keys(folds), 'N')
+    for lnum in sort(keys(folds), 's:LowToHigh')
         let l:fold = folds[lnum]
 
         " Open a fold at the appropriate level on this line.
@@ -101,7 +101,7 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
     " will be left-justified, while the flags will be concatenated together and 
     " right-justified.
 
-    function! AddBuiltinFlag(flag, condition) closure
+    function! AddBuiltinFlag(flags, flag, condition)
         if a:condition && index(g:coiled_snake_foldtext_flags, a:flag) >= 0
             call add(flags, a:flag)
         endif
@@ -124,8 +124,8 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
             let flags = filter(flags[1:], 'v:val != ""')
         endif
 
-        call AddBuiltinFlag("doc", next_line =~# s:docstring_pattern)
-        call AddBuiltinFlag("static", get(focus, 'is_static'))
+        call AddBuiltinFlag(flags, "doc", next_line =~# s:docstring_pattern)
+        call AddBuiltinFlag(flags, "static", get(focus, 'is_static'))
 
     else
         let title = focus.text
@@ -200,7 +200,7 @@ function! coiledsnake#DebugFolds() abort "{{{1
     let folds = s:FoldsFromLines(lines)
 
     echo "  # In Out Type      Parent    Lvl Ig N? >? Text"
-    for lnum in sort(keys(folds), 'N')
+    for lnum in sort(keys(folds), 's:LowToHigh')
         let fold = folds[lnum]
         echo printf("%3s %2s %3s %-9.9s %-9.9s %3s %2s %2s %2s %s",
                     \ get(l:fold, 'lnum', '???'),
@@ -272,7 +272,7 @@ function! s:FoldsFromLines(lines) abort "{{{1
     " level of indentation, etc.) or have been ignored for some reason (e.g. in 
     " response to the user, or in the case of decorator and import fold, to 
     " avoid overlaps).
-    for lnum in sort(keys(candidate_folds), 'N')
+    for lnum in sort(keys(candidate_folds), 's:LowToHigh')
         let l:fold = candidate_folds[lnum]
 
         if l:fold.ignore
@@ -323,7 +323,7 @@ function! s:FoldsFromLines(lines) abort "{{{1
 
     " Make note of consecutive folds.  Blank lines may be collapsed bweteen 
     " consecutive folds of the same type.
-    for lnum in sort(keys(folds), 'N')
+    for lnum in sort(keys(folds), 's:LowToHigh')
         let l:fold = folds[lnum]
         let l:fold.next_fold = get(
                     \ folds,
@@ -577,8 +577,7 @@ function! s:CloseBlock(lines, folds) abort dict "{{{1
 endfunction
 
 function! s:CloseDataStructure(lines, folds) abort dict "{{{1
-    let CloseBlock = function('s:CloseBlock', [], self)
-    call CloseBlock(a:lines, a:folds)
+    call call('s:CloseBlock', [a:lines, a:folds], self)
 
     if self.outside_line.text =~# s:data_struct_close_pattern 
         let self.inside_line = self.outside_line
@@ -607,7 +606,7 @@ endfunction
 
 function! s:FindDocstringTitle(focus, foldstart, foldend) abort "{{{1
     let ii = matchend(a:focus.text, s:string_start_pattern.'\s*')
-    let line = a:focus.text[ii:len(a:focus.text)]
+    let line = strpart(a:focus.text, ii)
     let indent = repeat(' ', indent(a:foldstart))
 
     if line !~# s:blank_pattern
@@ -620,11 +619,15 @@ function! s:FindDocstringTitle(focus, foldstart, foldend) abort "{{{1
 
         if line !~# s:blank_pattern
             let jj = matchend(line, '^\s*')
-            let a:focus.text = indent . line[jj:]
+            let a:focus.text = indent . strpart(line, jj)
             let a:focus.offset = offset
             return
         endif
     endfor
+endfunction
+
+function! s:LowToHigh(x, y) abort "{{{1
+    return str2nr(a:x) - str2nr(a:y)
 endfunction
 
 function! s:BufferWidth() abort "{{{1
