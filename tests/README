@@ -1,0 +1,4 @@
+Before running any tests, initialize the blank runtime by doing the following:
+
+  ./run_vim.sh
+  :PlugInstall

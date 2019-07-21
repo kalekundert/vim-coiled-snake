@@ -57,7 +57,10 @@ Clone the repository into ``.vim/pack/*/start``:
     git clone git://github.com/kalekundert/vim-coiled-snake.git
 
 Note that you can name the directories in ``.vim/pack/`` whatever you like, so 
-the ``git-plugins`` name in the snippet above is just an example.
+the ``git-plugins`` name in the snippet above is just an example.  Also be sure 
+to enable the following option in your ``.vimrc`` file::
+
+    filetype plugin indent on
 
 Usage
 -----
