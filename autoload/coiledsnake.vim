@@ -374,9 +374,10 @@ function! s:InitLine(lnum, state) abort "{{{1
 
     " Specially handle the case where a long argument list is ended on it's own 
     " line at the same indentation level as the `def` keyword.  This is the 
-    " style enforced by the Black formatter, see issue #4, #8.
+    " style enforced by the Black formatter, see issues #4, #8, #12 (I keep 
+    " having problems with this regexp, lol).
 
-    elseif line.text =~# '^\s*)\(\s*->\s*\S\+\)\?\s*:'
+    elseif line.text =~# '^\s*)\s*\(->\s*.\+\)\?:\s*$'
       let line.is_code = 0
 
     " Also keep track of blank lines, which can affect where folds end.
