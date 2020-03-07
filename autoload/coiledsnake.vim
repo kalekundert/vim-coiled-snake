@@ -373,9 +373,10 @@ function! s:InitLine(lnum, state) abort "{{{1
         let a:state.continuation_backslash = 1
 
     " Specially handle the case where a long argument list is ended on it's own 
-    " line at the same indentation level as the `def` keyword.  This is the 
-    " style enforced by the Black formatter, see issues #4, #8, #12 (I keep 
-    " having problems with this regexp, lol).
+    " line at the same indentation level as the `def` keyword (also accounting 
+    " for return type annotations).  This is the style enforced by the Black 
+    " formatter, see issues #4, #8, #12.  Note that this would be taken care 
+    " automatically if the above logic could handle open parentheses.  
 
     elseif line.text =~# '^\s*)\s*\(->\s*.\+\)\?:\s*$'
       let line.is_code = 0
@@ -632,22 +633,33 @@ function! s:LowToHigh(x, y) abort "{{{1
 endfunction
 
 function! s:BufferWidth() abort "{{{1
-    " The `:sign place` output contains two header lines.
-    " The sign column is fixed at two columns, if present.
-    redir =>a | exe "silent sign place buffer=".bufnr('') | redir end
-    let signlist = split(a, '\n')
+    " Getting the 'usable' window width means dealing with a lot of corner 
+    " cases.  See: https://stackoverflow.com/questions/26315925/get-usable-window-width-in-vim-script/52049954#52049954
+    let width = winwidth(0)
 
     " If there are line numbers, the `&numberwidth` setting defines their 
     " minimum width.  But we also have to check how many lines are in the file, 
-    " because the actual width will be large enough to accomodate the biggest 
+    " because the actual width will be large enough to accommodate the biggest 
     " number. 
-    let lineno_cols = max([&numberwidth, strlen(line('$')) + 1])
+    let numberwidth = max([&numberwidth, strlen(line('$')) + 1])
+    let numwidth = (&number || &relativenumber) ? numberwidth : 0
 
-    return winwidth(0)
-                \ - &foldcolumn
-                \ - ((&number || &relativenumber) ? lineno_cols : 0)
-                \ - (len(signlist) > 2 ? 2 : 0)
+    " If present, the column indicating the fold will be one character wide.
+    let foldwidth = &foldcolumn
 
+    if &signcolumn == 'yes'
+        let signwidth = 2
+    elseif &signcolumn == 'auto'
+        " The `:sign place` output contains two header lines.
+        " The sign column is fixed at two columns, if present.
+        let signlist = execute(printf('sign place buffer=%d', bufnr('')))
+        let signlist = split(signlist, "\n")
+        let signwidth = len(signlist) > 2 ? 2 : 0
+    else
+        let signwidth = 0
+    endif
+
+    return width - numwidth - foldwidth - signwidth
 endfunction
 
 " vim: ts=4 sts=4 sw=4
