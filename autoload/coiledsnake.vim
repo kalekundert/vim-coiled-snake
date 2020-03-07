@@ -103,7 +103,7 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
 
     function! AddBuiltinFlag(flags, flag, condition)
         if a:condition && index(g:coiled_snake_foldtext_flags, a:flag) >= 0
-            call add(flags, a:flag)
+            call add(a:flags, a:flag)
         endif
     endfunction
 
