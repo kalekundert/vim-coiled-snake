@@ -140,7 +140,7 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
     let flags = add(flags, 1 + a:foldend - a:foldstart)
     let status = '(' . join(flags, ') (') . ')'
 
-    let cutoff = s:BufferWidth() - strlen(status)
+    let cutoff = s:BufferUsableWidth() - strlen(status)
     let title = substitute(title, '^\(.\{-}\)\s*$', '\1', '')
     
     if strlen(title) >= cutoff
@@ -151,7 +151,12 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
         let padding = ' ' . repeat(' ', padding)
     endif
 
-    return title . padding . status
+	if len(split(&signcolumn,':')) > 1
+		let extrarightpadding = ' ' . repeat(' ', split(&signcolumn,':')[1]*2 - 1)
+	else
+		let extrarightpadding = ''
+	endif
+    return title . padding . status . extrarightpadding
 
 endfunction
 
@@ -632,7 +637,7 @@ function! s:LowToHigh(x, y) abort "{{{1
     return str2nr(a:x) - str2nr(a:y)
 endfunction
 
-function! s:BufferWidth() abort "{{{1
+function! s:BufferUsableWidth() abort "{{{1
     " Getting the 'usable' window width means dealing with a lot of corner 
     " cases.  See: https://stackoverflow.com/questions/26315925/get-usable-window-width-in-vim-script/52049954#52049954
     let width = winwidth(0)
@@ -649,12 +654,17 @@ function! s:BufferWidth() abort "{{{1
 
     if &signcolumn == 'yes'
         let signwidth = 2
-    elseif &signcolumn == 'auto'
+    elseif &signcolumn =~ 'auto'
+		if &signcolumn == 'auto'
         " The `:sign place` output contains two header lines.
         " The sign column is fixed at two columns, if present.
         let signlist = execute(printf('sign place buffer=%d', bufnr('')))
         let signlist = split(signlist, "\n")
         let signwidth = len(signlist) > 2 ? 2 : 0
+	else
+		let maxsignwidth = split(&signcolumn,':')[1]
+		let signwidth = maxsignwidth * 2
+	endif
     else
         let signwidth = 0
     endif
