@@ -149,14 +149,14 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
     else
         let padding = cutoff - strlen(title) - 1
         let padding = ' ' . repeat(' ', padding)
-	endif
+    endif
 
-	if g:coiled_snake_explicit_sign_width != 0
-		let rightpadding = g:coiled_snake_explicit_sign_width*2 - 1
-		let rightpadding = ' ' . repeat(' ', rightpadding)
-	else
-		let rightpadding = ''
-	endif
+    if g:coiled_snake_explicit_sign_width != 0
+        let rightpadding = g:coiled_snake_explicit_sign_width*2 - 1
+        let rightpadding = ' ' . repeat(' ', rightpadding)
+    else
+        let rightpadding = ''
+    endif
 
     return title . padding . status . rightpadding
 
@@ -640,7 +640,7 @@ function! s:LowToHigh(x, y) abort "{{{1
     return str2nr(a:x) - str2nr(a:y)
 endfunction
 
-function! s:BufferWidth() abort "{{{
+function! s:BufferWidth() abort "{{{1
     " Getting the 'usable' window width means dealing with a lot of corner 
     " cases.  See: https://stackoverflow.com/questions/26315925/get-usable-window-width-in-vim-script/52049954#52049954
     let width = winwidth(0)
@@ -667,9 +667,9 @@ function! s:BufferWidth() abort "{{{
         let signwidth = 0
     endif
 
-	if g:coiled_snake_explicit_sign_width != 0
-		let signwidth = g:coiled_snake_explicit_sign_width * 2
-	endif
+    if g:coiled_snake_explicit_sign_width != 0
+        let signwidth = g:coiled_snake_explicit_sign_width * 2
+    endif
 
     return width - numwidth - foldwidth - signwidth
 endfunction
