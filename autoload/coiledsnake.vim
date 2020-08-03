@@ -149,9 +149,16 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
     else
         let padding = cutoff - strlen(title) - 1
         let padding = ' ' . repeat(' ', padding)
-    endif
+	endif
 
-    return title . padding . status
+	if g:coiled_snake_explicit_sign_width != 0
+		let rightpadding = g:coiled_snake_explicit_sign_width*2 - 1
+		let rightpadding = ' ' . repeat(' ', rightpadding)
+	else
+		let rightpadding = ''
+	endif
+
+    return title . padding . status . rightpadding
 
 endfunction
 
@@ -159,6 +166,7 @@ function! coiledsnake#loadSettings() abort "{{{1
     call s:SetIfUndef('g:coiled_snake_set_foldexpr', 1)
     call s:SetIfUndef('g:coiled_snake_set_foldtext', 1)
     call s:SetIfUndef('g:coiled_snake_foldtext_flags', ['doc', 'static'])
+    call s:SetIfUndef('g:coiled_snake_explicit_sign_width', 0)
 endfunction
 
 function! coiledsnake#EnableFoldText() abort "{{{1
@@ -632,7 +640,7 @@ function! s:LowToHigh(x, y) abort "{{{1
     return str2nr(a:x) - str2nr(a:y)
 endfunction
 
-function! s:BufferWidth() abort "{{{1
+function! s:BufferWidth() abort "{{{
     " Getting the 'usable' window width means dealing with a lot of corner 
     " cases.  See: https://stackoverflow.com/questions/26315925/get-usable-window-width-in-vim-script/52049954#52049954
     let width = winwidth(0)
@@ -659,7 +667,11 @@ function! s:BufferWidth() abort "{{{1
         let signwidth = 0
     endif
 
+	if g:coiled_snake_explicit_sign_width != 0
+		let signwidth = g:coiled_snake_explicit_sign_width * 2
+	endif
+
     return width - numwidth - foldwidth - signwidth
 endfunction
 
-" vim: ts=4 sts=4 sw=4
+" vim: ts=4 sts=4 sw=4 fdm=marker
