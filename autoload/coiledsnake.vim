@@ -354,23 +354,31 @@ function! s:InitLine(lnum, state) abort "{{{1
             unlet a:state.multiline_string_start
         endif
 
-    elseif line.text =~# s:string_start_pattern
+        " Stop here, because we're in a string and all the other conditionals 
+        " in this function assume we're in code.
+        return line
+    endif
+
+    if line.text =~# s:string_start_pattern
         if line.text !~# s:string_start_end_pattern
             let a:state.multiline_string_start = 
                         \ matchlist(line.text, s:string_start_pattern)[1]
         endif
+    endif
 
     " Identify lines that are continued from previous lines, e.g. if the 
     " previous line ended with a backslash.  I'd also like to include open 
     " parentheses in this logic, but I'd have to find a way to make it robust 
     " against parentheses in strings...
 
-    elseif has_key(a:state, 'continuation_backslash')
+    if has_key(a:state, 'continuation_backslash')
         let line.is_code = 0
         unlet a:state.continuation_backslash
+    endif
 
-    elseif line.text =~# '\\$'
+    if line.text =~# '\\$'
         let a:state.continuation_backslash = 1
+    endif
 
     " Specially handle the case where a long argument list is ended on it's own 
     " line at the same indentation level as the `def` keyword (also accounting 
@@ -378,15 +386,15 @@ function! s:InitLine(lnum, state) abort "{{{1
     " formatter, see issues #4, #8, #12.  Note that this would be taken care 
     " automatically if the above logic could handle open parentheses.  
 
-    elseif line.text =~# '^\s*)\s*\(->\s*.\+\)\?:\s*$'
+    if line.text =~# '^\s*)\s*\(->\s*.\+\)\?:\s*$'
       let line.is_code = 0
+    endif
 
     " Also keep track of blank lines, which can affect where folds end.
 
-    elseif line.text =~# s:blank_pattern
+    if line.text =~# s:blank_pattern
         let line.is_code = 0
         let line.is_blank = 1
-
     endif
 
     return line

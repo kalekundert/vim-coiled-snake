@@ -70,22 +70,22 @@ from foo import (
 code = 1
 
 from foo import (
-        foo
+foo
 )
 
 code = 1
 
 from foo import (
-        foo
-        foo
+foo
+foo
 )
 
 code = 1
 
 from foo import (
-        foo
-        foo
-        foo
+foo
+foo
+foo
 )
 
 code = 1
@@ -96,23 +96,23 @@ from foo import \
 code = 1
 
 from foo import \
-        bar     \
-        bar
+bar             \
+bar
 
 code = 1
 
 from foo import \
-        bar     \
-        bar     \
-        bar
+bar             \
+bar             \
+bar
 
 code = 1
 
 from foo import \
-        bar     \
-        bar     \
-        bar     \
-        bar
+bar             \
+bar             \
+bar             \
+bar
 
 code = 1
 
@@ -121,7 +121,7 @@ code = 1
 import foo
 from foo import foo
 from foo import (
-        foo
+foo
 )
 from foo import \
-        foo
+foo
