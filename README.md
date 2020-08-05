@@ -148,7 +148,7 @@ No configuration is necessary, but the following options are available:
 
   - ``type`` (str, read-only): The kind of lines being folded.  The following 
     values are possible: ``'import'``, ``'decorator'``, ``'class'``, 
-    ``'function'``, ``'struct'``, ``'docstring'``.
+    ``'function'``, ``'struct'``, ``'doc'``.
 
   - ``parent`` (Fold, read-only): The fold containing this one, or ``{}`` if 
     this is a top level fold.
