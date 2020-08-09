@@ -5,7 +5,6 @@ Plug '~/vim-coiled-snake'
 Plug 'Konfekt/FastFold'
 call plug#end()
 
-set foldcolumn=5
 set signcolumn=yes
-set number
+let g:coiled_snake_explicit_sign_width=5
 

@@ -101,6 +101,13 @@ No configuration is necessary, but the following options are available:
   - ``'doc'``: Documented classes and functions.
   - ``'static'``: Static and class methods.
 
+- ``g:coiled_snake_explicit_sign_width`` (default: ``0``)
+
+  Explicitly set the width of the sign column used by plugins such as 
+  [vim-gitgutter](https://github.com/airblade/vim-gitgutter).  This width is 
+  determined automatically in most cases, but this setting may be useful if the 
+  automatic determination fails.
+
 - ``g:CoiledSnakeConfigureFold(fold)``
 
   This function is called on each automatically-identified fold to customize 

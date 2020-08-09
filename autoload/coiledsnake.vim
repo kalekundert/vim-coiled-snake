@@ -152,13 +152,13 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
     endif
 
     if g:coiled_snake_explicit_sign_width != 0
-        let rightpadding = g:coiled_snake_explicit_sign_width*2 - 1
-        let rightpadding = ' ' . repeat(' ', rightpadding)
+        let trailing = g:coiled_snake_explicit_sign_width
+        let trailing = ' ' . repeat(' ', rightpadding)
     else
-        let rightpadding = ''
+        let trailing = ''
     endif
 
-    return title . padding . status . rightpadding
+    return title . padding . status . trailing
 
 endfunction
 
@@ -239,6 +239,11 @@ function! coiledsnake#DebugText() abort "{{{1
     for lnum in range(1, line('$'))
         echo coiledsnake#FormatText(lnum, lnum+1)
     endfor
+endfunction
+
+" }}}1
+function! coiledsnake#DebugBufferWidth() abort "{{{1
+    echo s:BufferWidth()
 endfunction
 
 " }}}1
@@ -663,17 +668,8 @@ function! s:BufferWidth() abort "{{{1
     " If present, the column indicating the fold will be one character wide.
     let foldwidth = &foldcolumn
 
-    if &signcolumn == 'yes'
-        let signwidth = 2
-    elseif &signcolumn == 'auto'
-        " The `:sign place` output contains two header lines.
-        " The sign column is fixed at two columns, if present.
-        let signlist = execute(printf('sign place buffer=%d', bufnr('')))
-        let signlist = split(signlist, "\n")
-        let signwidth = len(signlist) > 2 ? 2 : 0
-    else
     if g:coiled_snake_explicit_sign_width != 0
-        let signwidth = g:coiled_snake_explicit_sign_width * 2
+        let signwidth = g:coiled_snake_explicit_sign_width
     elseif &signcolumn == 'yes'
         let signwidth = 2
     elseif &signcolumn == 'auto'
@@ -685,6 +681,7 @@ function! s:BufferWidth() abort "{{{1
     else
         let signwidth = 0
     endif
+
     return width - numwidth - foldwidth - signwidth
 endfunction
 
