@@ -399,7 +399,7 @@ function! s:InitLine(lnum, state) abort "{{{1
     " formatter, see issues #4, #8, #12.  Note that this would be taken care 
     " automatically if the above logic could handle open parentheses.  
 
-    if line.text =~# '^\s*)\s*\(->\s*.\+\)\?:\s*$'
+    if line.text =~# '^\s*)\s*\(->\s*.\+\)\?:\s*\(#.\+\)\?$'
       let line.is_code = 0
     endif
 
