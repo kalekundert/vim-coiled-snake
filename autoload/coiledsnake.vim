@@ -675,7 +675,7 @@ function! s:BufferWidth() abort "{{{1
     elseif &signcolumn == 'auto'
         " The `:sign place` output contains two header lines.
         " The sign column is fixed at two columns, if present.
-        let signlist = execute(printf('sign place buffer=%d', bufnr('')))
+        let signlist = execute(printf('sign place group=* buffer=%d', bufnr('')))
         let signlist = split(signlist, "\n")
         let signwidth = len(signlist) > 2 ? 2 : 0
     else
