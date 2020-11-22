@@ -672,12 +672,30 @@ function! s:BufferWidth() abort "{{{1
         let signwidth = g:coiled_snake_explicit_sign_width
     elseif &signcolumn == 'yes'
         let signwidth = 2
+    elseif &signcolumn =~ 'yes'
+        let signwidth = &signcolumn
+        if signwidth =~ ':'
+            let signwidth = split(signwidth, ':')[1]
+        endif
+        let signwidth *= 2  " each signcolumn is 2-char wide
     elseif &signcolumn == 'auto'
         " The `:sign place` output contains two header lines.
         " The sign column is fixed at two columns, if present.
-        let signlist = execute(printf('sign place group=* buffer=%d', bufnr('')))
+        let supports_sign_groups = has('nvim-0.4.2') || has('patch-8.1.614')
+        let signlist = execute(printf('sign place ' . (supports_sign_groups ? 'group=* ' : '') . 'buffer=%d', bufnr('')))
         let signlist = split(signlist, "\n")
         let signwidth = len(signlist) > 2 ? 2 : 0
+    elseif &signcolumn =~ 'auto'    " i.e. neovim
+        let signwidth = 0
+        if len(sign_getplaced(bufnr(),{'group':'*'})[0].signs) " signs exist
+            let signwidth = 0
+            for l:sign in sign_getplaced(bufnr(),{'group':'*'})[0].signs
+                let lnum = l:sign.lnum
+                let signs = len(sign_getplaced(bufnr(),{'group':'*', 'lnum':lnum})[0].signs)
+                let signwidth = (signs > signwidth ? signs : signwidth)
+            endfor
+        endif
+        let signwidth *= 2  " each signcolumn is 2-char wide
     else
         let signwidth = 0
     endif
@@ -685,4 +703,4 @@ function! s:BufferWidth() abort "{{{1
     return width - numwidth - foldwidth - signwidth
 endfunction
 
-" vim: ts=4 sts=4 sw=4 fdm=marker
+" vim: ts=4 sts=4 sw=4 fdm=marker et
