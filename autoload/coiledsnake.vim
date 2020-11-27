@@ -170,12 +170,24 @@ function! coiledsnake#loadSettings() abort "{{{1
 endfunction
 
 function! coiledsnake#EnableFoldText() abort "{{{1
-    setlocal foldtext=coiledsnake#FoldText()
+    augroup CoiledSnake
+        autocmd BufEnter <buffer> let b:coiled_snake_saved_foldtext = &l:foldtext
+                    \| let &l:foldtext = 'coiledsnake#FoldText()'
+
+        autocmd BufLeave <buffer> let &l:foldtext = b:coiled_snake_saved_foldtext
+    augroup END
 endfunction
 
 function! coiledsnake#EnableFoldExpr() abort "{{{1
-    setlocal foldexpr=coiledsnake#FoldExpr(v:lnum)
-    setlocal foldmethod=expr
+    augroup CoiledSnake
+        autocmd BufEnter <buffer> let b:coiled_snake_saved_foldexpr = &l:foldexpr
+                    \| let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
+                    \| let b:coiled_snake_saved_foldmethod = &l:foldmethod
+                    \| let &l:foldmethod = 'expr'
+
+        autocmd BufLeave <buffer> let &l:foldexpr = b:coiled_snake_saved_foldexpr
+                    \| let &l:foldmethod = b:coiled_snake_saved_foldmethod
+    augroup END
 
     augroup CoiledSnake
         autocmd TextChanged,InsertLeave <buffer> call coiledsnake#ClearFolds()
