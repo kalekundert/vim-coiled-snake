@@ -528,7 +528,7 @@ function! s:CloseImports(lines, folds) abort dict "{{{1
 
         elseif line.text =~# s:import_pattern
             let self.inside_line = line
-            let continuation_paren = (line.text =~# '(')
+            let continuation_paren = (line.text =~# '([^)]*$')
 
         elseif line.is_code && line.text !~# s:import_continue_pattern
             return

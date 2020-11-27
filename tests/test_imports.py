@@ -64,6 +64,10 @@ code = 1
 
 # Imports broken across multiple lines should also be folded.
 
+from foo import ()
+
+code = 1
+
 from foo import (
 )
 
@@ -87,6 +91,13 @@ foo
 foo
 foo
 )
+
+code = 1
+
+import foo; foo()
+import foo
+import foo
+import foo
 
 code = 1
 
