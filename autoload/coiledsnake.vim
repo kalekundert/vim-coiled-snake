@@ -170,6 +170,9 @@ function! coiledsnake#loadSettings() abort "{{{1
 endfunction
 
 function! coiledsnake#EnableFoldText() abort "{{{1
+    let b:coiled_snake_saved_foldtext = &l:foldtext
+    let &l:foldtext = 'coiledsnake#FoldText()'
+
     augroup CoiledSnake
         autocmd BufEnter <buffer> let b:coiled_snake_saved_foldtext = &l:foldtext
                     \| let &l:foldtext = 'coiledsnake#FoldText()'
@@ -179,6 +182,11 @@ function! coiledsnake#EnableFoldText() abort "{{{1
 endfunction
 
 function! coiledsnake#EnableFoldExpr() abort "{{{1
+     let b:coiled_snake_saved_foldexpr = &l:foldexpr
+     let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
+     let b:coiled_snake_saved_foldmethod = &l:foldmethod
+     let &l:foldmethod = 'expr'
+
     augroup CoiledSnake
         autocmd BufEnter <buffer> let b:coiled_snake_saved_foldexpr = &l:foldexpr
                     \| let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
