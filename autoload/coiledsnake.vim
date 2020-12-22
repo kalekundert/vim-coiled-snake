@@ -688,6 +688,32 @@ function! s:BufferWidth() abort "{{{1
     " If present, the column indicating the fold will be one character wide.
     let foldwidth = &foldcolumn
 
+    if foldwidth =~# 'auto' "neovim
+        " we check if the cache exists. if yes, then we check if the cache is
+        " up-to-date by checking current b:changedtick with that of the cache.
+        " If they match, we use the cached value for foldwidth
+        " If they don't match, (ie. buffer changed since last caching),
+        " we re-calculate foldwidth and save it in the cache
+        if !exists('b:coiled_snake_cached_foldwidth') || b:changedtick != b:coiled_snake_cached_foldwidth[0]
+            let maxfoldwidth = (foldwidth =~# 'auto:') ? (split(foldwidth, ':')[1]) : 9
+            let maxfolddepth = 0
+            for lnum in range(1, line('$'))
+                let currentfolddepth = foldlevel(lnum)
+                if currentfolddepth > maxfolddepth
+                    let maxfolddepth = currentfolddepth
+                endif
+            endfor
+            if maxfolddepth > maxfoldwidth
+                let foldwidth = maxfoldwidth
+            else
+                let foldwidth = maxfolddepth
+            endif
+            let b:coiled_snake_cached_foldwidth = deepcopy([b:changedtick, foldwidth]) "deepcopy() due to b:changedtick
+        else
+            let foldwidth = b:coiled_snake_cached_foldwidth[1]
+        endif
+    endif
+
     if g:coiled_snake_explicit_sign_width != 0
         let signwidth = g:coiled_snake_explicit_sign_width
     elseif &signcolumn == 'yes'
