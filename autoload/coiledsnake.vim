@@ -170,35 +170,29 @@ function! coiledsnake#loadSettings() abort "{{{1
 endfunction
 
 function! coiledsnake#EnableFoldText() abort "{{{1
-    let b:coiled_snake_saved_foldtext = &l:foldtext
-    let &l:foldtext = 'coiledsnake#FoldText()'
-
-    augroup CoiledSnake
-        autocmd BufEnter <buffer> let b:coiled_snake_saved_foldtext = &l:foldtext
-                    \| let &l:foldtext = 'coiledsnake#FoldText()'
-
-        autocmd BufLeave <buffer> let &l:foldtext = b:coiled_snake_saved_foldtext
-    augroup END
+    let w:coiled_snake_saved_foldtext = &foldtext
+    let &foldtext = 'coiledsnake#FoldText()'
 endfunction
 
 function! coiledsnake#EnableFoldExpr() abort "{{{1
-     let b:coiled_snake_saved_foldexpr = &l:foldexpr
-     let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
-     let b:coiled_snake_saved_foldmethod = &l:foldmethod
-     let &l:foldmethod = 'expr'
-
-    augroup CoiledSnake
-        autocmd BufEnter <buffer> let b:coiled_snake_saved_foldexpr = &l:foldexpr
-                    \| let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
-                    \| let b:coiled_snake_saved_foldmethod = &l:foldmethod
-                    \| let &l:foldmethod = 'expr'
-
-        autocmd BufLeave <buffer> let &l:foldexpr = b:coiled_snake_saved_foldexpr
-                    \| let &l:foldmethod = b:coiled_snake_saved_foldmethod
-    augroup END
-
+    let w:coiled_snake_saved_foldexpr = &foldexpr
+    let w:coiled_snake_saved_foldmethod = &foldmethod
+    let &foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
+    let &foldmethod = 'expr'
     augroup CoiledSnake
         autocmd TextChanged,InsertLeave <buffer> call coiledsnake#ClearFolds()
+    augroup END
+endfunction
+
+function! coiledsnake#ResetFoldText() abort "{{{1
+    let &foldtext = w:coiled_snake_saved_foldtext
+endfunction
+
+function! coiledsnake#ResetFoldExpr() abort "{{{1
+    let &foldexpr = w:coiled_snake_saved_foldexpr
+    let &foldmethod = w:coiled_snake_saved_foldmethod
+    augroup CoiledSnake
+        autocmd! TextChanged,InsertLeave <buffer>
     augroup END
 endfunction
 
@@ -748,5 +742,6 @@ function! s:BufferWidth() abort "{{{1
 
     return width - numwidth - foldwidth - signwidth
 endfunction
+" }}}1
 
-" vim: ts=4 sts=4 sw=4 fdm=marker et
+" vim: ts=4 sts=4 sw=4 fdm=marker et sr
