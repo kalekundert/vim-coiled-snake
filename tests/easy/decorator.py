@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-Docstring
-
+@bar
 def foo():
     pass
-"""

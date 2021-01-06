@@ -212,14 +212,24 @@ No configuration is necessary, but the following options are available:
 
   - ``text`` (str, read-only): The text contained by the line.
 
+  - ``code`` (str, read-only): A modified version of `Line.text` without 
+    strings or comments.
+
   - ``indent`` (int, read-only): The number of leading spaces on the line.
 
-  - ``is_code`` (bool, read-only): ``1`` if the line is considered "code", 
-    ``0`` otherwise.  A line is not considered "code" if it is blank or part of 
-    a multiline string.
+  - ``ignore_indent`` (bool, read-only): If true, the indentation on this line 
+    is not meaningful to python.  This could mean that the line is a comment, 
+    part of a multiline string, wrapped in parentheses, etc.
+
+  - ``paren_level`` (int, read-only): The number of parentheses, brackets, and 
+    braces surrounding this line.
 
   - ``is_blank`` (bool, read-only): ``1`` if the line contains only whitespace, 
     ``0`` otherwise.
+
+  - ``is_continuation`` (bool, read-only): If true, this line is part of an 
+    expression that began on a previous line.
+
 
 Troubleshooting
 ---------------

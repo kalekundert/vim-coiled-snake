@@ -7,10 +7,26 @@ foo = [
 foo = [
         1]
 
+foo = [
+        1,
+        [
+            1,
+            2,
+            3,
+            4,
+        ],
+]
+
 foo = ()
 
 foo = (
         1,
+        (
+            1,
+            2,
+            3,
+            4,
+        ),
 )
 
 foo = (
@@ -20,6 +36,12 @@ foo = {}
 
 foo = {
         1,
+        {
+            1,
+            2,
+            3,
+            4,
+        },
 }
 
 foo = {
@@ -28,8 +50,8 @@ foo = {
 foo = """ """
 
 foo = """
-This is 
-unindented
+    This is 
+    indented
 """
 
 foo = """
@@ -39,8 +61,8 @@ unindented"""
 foo = ''' '''
 
 foo = '''
-This is 
-unindented
+    This is 
+    indented
 '''
 
 foo = '''

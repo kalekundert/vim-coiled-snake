@@ -2,17 +2,18 @@
 let s:blank_pattern = '^\s*$'
 let s:comment_pattern = '^\s*#'
 let s:import_pattern = '^\(import\|from\)'
-let s:import_continue_pattern = join([s:import_pattern, s:blank_pattern, s:comment_pattern], '\|')
 let s:class_pattern = '^\s*class\s'
 let s:function_pattern = '^\s*\(\(async\s\+\)\?def\s\|if __name__\s==\)'
 let s:block_pattern = join([s:class_pattern, s:function_pattern], '\|')
 let s:decorator_pattern = '^\s*@'
-let s:string_start_pattern = '[bBfFrRuU]\{0,2}\(''''''\|"""\)\\\?'
-let s:string_start_end_pattern = s:string_start_pattern . '.*\1'
-let s:docstring_pattern = '^\s*' . s:string_start_pattern
-let s:data_struct_pattern = '^\s*[a-zA-Z0-9_.]\+ = \({\|\[\|(\|'.s:string_start_pattern.'\)\s*$'
-let s:data_struct_close_pattern = '^\s*\(}\|\]\|)\|''''''\|"""\)$'
-let s:manual_open_pattern = '^\s*##'
+let s:multiline_string_start_pattern = '\v[bBfFrRuU]*(''''''|""")\\?'
+let s:multiline_string_start_end_pattern = s:multiline_string_start_pattern . '.*\1'
+let s:uniline_string_start_pattern = '\v(''''''|"""|''|")' " triple-quotes first, so that the longest match is made.
+let s:uniline_string_end_pattern = '\\@<!(\\\\)*\\@<!\1' " https://stackoverflow.com/questions/42598040/python-regex-for-matching-odd-number-of-consecutive-backslashes
+let s:uniline_string_pattern = s:uniline_string_start_pattern . '.{-}' . s:uniline_string_end_pattern
+let s:docstring_pattern = '^\s*' . s:multiline_string_start_pattern
+let s:data_struct_pattern = '\v(\{|\[|\()\s*$'
+let s:string_struct_pattern = s:multiline_string_start_pattern . 'START\s*$'
 let s:manual_ignore_pattern = '#$'
 " }}}1
 
@@ -203,15 +204,16 @@ function! coiledsnake#DebugLines() abort "{{{1
         return
     endif
 
-    echo "#   Code? Blank? Indent Text"
+    echo "#   Blank? Cont? Indent Paren Code"
     for lnum in range(0, len(lines)-1)
         let line = lines[lnum]
-        echo printf("%-3s %5s %6s %6s %s",
+        echo printf("%-3s %6s %5s %6s %5s %s",
                     \ get(line, 'lnum', '???'),
-                    \ get(line, 'is_code', '?'),
                     \ get(line, 'is_blank', '?'),
+                    \ get(line, 'is_continuation', '?'),
                     \ get(line, 'indent', '?'),
-                    \ get(line, 'text', '???'))
+                    \ get(line, 'paren_level', '?'),
+                    \ get(line, 'code', '???'))
     endfor
 endfunction
 
@@ -253,11 +255,9 @@ function! coiledsnake#DebugText() abort "{{{1
     endfor
 endfunction
 
-" }}}1
 function! coiledsnake#DebugBufferWidth() abort "{{{1
     echo s:BufferWidth()
 endfunction
-
 " }}}1
 
 function! s:SetIfUndef(name, value) abort " {{{1
@@ -268,7 +268,7 @@ endfunction
 
 function! s:LinesFromBuffer() abort "{{{1
     let lines = []
-    let state = {'lines': lines}
+    let state = {'lines': lines, 'paren_level': 0}
 
     for lnum in range(1, line('$'))
         let line = s:InitLine(lnum, state)
@@ -363,66 +363,113 @@ function! s:InitLine(lnum, state) abort "{{{1
     let line = {}
     let line.lnum = a:lnum
     let line.text = getline(a:lnum)
+    let line.code = line.text  " The line with strings and comments removed.
     let line.indent = indent(a:lnum)
-    let line.is_code = 1
+    let line.ignore_indent = 0
+    let line.paren_level = 0
     let line.is_blank = 0
+    let line.is_continuation = 0
 
-    " Work out which lines are in comments or multiline strings and mark them 
-    " as being 'not code'.  These need to be (largely) ignored by the folding 
-    " machinery, since they could contain anything but shouldn't affect the 
-    " structure of the folds.
+    " Handle strings and comments first, because they will prune non-code 
+    " content that might otherwise confuse later parsers.
+    call s:InitLineString(line, a:state)
+    call s:InitLineComment(line, a:state)
+    call s:InitLineParen(line, a:state)
+    call s:InitLineBackslash(line, a:state)
+    call s:InitLineBlank(line, a:state)
 
-    if has_key(a:state, 'multiline_string_start')
-        let line.is_code = 0
+    return line
+endfunction
 
-        if line.text =~# a:state.multiline_string_start
-            unlet a:state.multiline_string_start
+function! s:InitLineString(line, state) "{{{1
+    " Ignore lines in multiline strings.
+    if has_key(a:state, 'multiline_string_delim')
+        let a:line.ignore_indent = 1
+
+        if a:line.code =~# a:state.multiline_string_delim
+            let a:line.code = 'END' . a:state.multiline_string_delim . 
+                        \ split(
+                        \       a:line.code,
+                        \       a:state.multiline_string_delim,
+                        \       1,
+                        \ )[-1]
+            unlet a:state.multiline_string_delim
+        else
+            let a:line.code = ''
         endif
 
-        " Stop here, because we're in a string and all the other conditionals 
-        " in this function assume we're in code.
-        return line
+        return
     endif
 
-    if line.text =~# s:string_start_pattern
-        if line.text !~# s:string_start_end_pattern
-            let a:state.multiline_string_start = 
-                        \ matchlist(line.text, s:string_start_pattern)[1]
-        endif
+    " Ignore text within strings.
+    
+    let a:line.code = substitute(
+                    \       a:line.code,
+                    \       s:uniline_string_pattern,
+                    \       '\1\1',
+                    \       'g',
+                    \ )
+
+    " Check to see if this line begins a multiline string.
+    if a:line.code =~# s:multiline_string_start_pattern && a:line.code !~# s:multiline_string_start_end_pattern
+        let a:state.multiline_string_delim = matchlist(
+                    \       a:line.code,
+                    \       s:multiline_string_start_pattern
+                    \ )[1]
+        let a:line.code = split(
+                    \       a:line.code,
+                    \       a:state.multiline_string_delim,
+                    \       1
+                    \ )[0]
+                    \ . a:state.multiline_string_delim . 'START'
     endif
 
-    " Identify lines that are continued from previous lines, e.g. if the 
-    " previous line ended with a backslash.  I'd also like to include open 
-    " parentheses in this logic, but I'd have to find a way to make it robust 
-    " against parentheses in strings...
+endfunction
 
+function! s:InitLineComment(line, state) "{{{1
+    let a:line.code = substitute(a:line.code, '\s*#.*$', '', '')
+    if a:line.code =~# s:blank_pattern
+        let a:line.ignore_indent = 1
+    endif
+endfunction
+
+function! s:InitLineParen(line, state) "{{{1
+    let a:line.paren_level     = a:state.paren_level
+    let a:line.is_continuation = a:line.is_continuation || a:line.paren_level > 0
+    let a:line.ignore_indent   = a:line.ignore_indent   || a:line.paren_level > 0
+
+    " Count opening parentheses after the assignment, so that the line with the 
+    " first parenthesis in not considered to be 'parenthesized'.
+    let a:state.paren_level += count(a:line.code, '(')
+    let a:state.paren_level += count(a:line.code, '[')
+    let a:state.paren_level += count(a:line.code, '{')
+
+    let a:state.paren_level -= count(a:line.code, ')')
+    let a:state.paren_level -= count(a:line.code, ']')
+    let a:state.paren_level -= count(a:line.code, '}')
+
+endfunction
+
+function! s:InitLineBackslash(line, state) "{{{1
     if has_key(a:state, 'continuation_backslash')
-        let line.is_code = 0
+        let a:line.ignore_indent = 1
+        let a:line.is_continuation = 1
         unlet a:state.continuation_backslash
     endif
 
-    if line.text =~# '\\$'
+    if a:line.code =~# '\\$'
         let a:state.continuation_backslash = 1
     endif
+endfunction
 
-    " Specially handle the case where a long argument list is ended on it's own 
-    " line at the same indentation level as the `def` keyword (also accounting 
-    " for return type annotations).  This is the style enforced by the Black 
-    " formatter, see issues #4, #8, #12.  Note that this would be taken care 
-    " automatically if the above logic could handle open parentheses.  
+function! s:InitLineBlank(line, state) "{{{1
+    " Keep track of blank lines, which can affect where folds end.
 
-    if line.text =~# '^\s*)\s*\(->\s*.\+\)\?:\s*\(#.\+\)\?$'
-      let line.is_code = 0
+    " Use `line.text` instead of `line.code`, because we want to know if the 
+    " line is truly blank.
+    if a:line.text =~# s:blank_pattern
+        let a:line.is_blank = 1
     endif
-
-    " Also keep track of blank lines, which can affect where folds end.
-
-    if line.text =~# s:blank_pattern
-        let line.is_code = 0
-        let line.is_blank = 1
-    endif
-
-    return line
 endfunction
 
 function! s:InitFold(line) abort "{{{1
@@ -457,41 +504,42 @@ function! s:InitFold(line) abort "{{{1
         endif
     endfunction
 
-    if ! a:line.is_code
-        " Don't match any of the other patterns if this line is a comment of a 
-        " multiline string.
-
-    elseif a:line.text =~# s:import_pattern
+    if a:line.code =~# s:import_pattern
         let fold.type = 'import'
         let fold.FindClosingInfo = function('s:CloseImports')
         let fold.min_lines = 4
 
-    elseif a:line.text =~# s:decorator_pattern
+    elseif a:line.code =~# s:decorator_pattern
         let fold.type = 'decorator'
         let fold.FindClosingInfo = function('s:CloseDecorator')
 
-    elseif a:line.text =~# s:class_pattern
+    elseif a:line.code =~# s:class_pattern
         let fold.type = 'class'
         let fold.FindClosingInfo = function('s:CloseBlock')
         let fold.num_blanks_below = 2
 
-    elseif a:line.text =~# s:function_pattern
+    elseif a:line.code =~# s:function_pattern
         let fold.type = 'function'
         let fold.FindClosingInfo = function('s:CloseBlock')
         let fold.num_blanks_below = 1
 
-    elseif a:line.text =~# s:data_struct_pattern
+    elseif a:line.code =~# s:data_struct_pattern
         let fold.type = 'struct'
         let fold.FindClosingInfo = function('s:CloseDataStructure')
         let fold.max_indent = 0
         let fold.min_lines = 6
 
-    elseif a:line.text =~# s:docstring_pattern 
-                \ && a:line.text !~# s:string_start_end_pattern
-
-        let fold.type = 'doc'
+    elseif a:line.code =~# s:string_struct_pattern 
         let fold.FindClosingInfo = function('s:CloseOnPattern')
-        let fold.close_pattern = matchlist(a:line.text, s:docstring_pattern)[1]
+        let fold.close_pattern = 'END' . matchlist(a:line.code, s:string_struct_pattern)[1]
+
+        if a:line.code =~# s:docstring_pattern && a:line.paren_level == 0
+            let fold.type = 'doc'
+        else
+            let fold.type = 'struct'
+            let fold.max_indent = 0
+            let fold.min_lines = 6
+        endif
     endif
 
     return fold
@@ -514,7 +562,7 @@ function! s:CloseOnPattern(lines, folds) abort dict "{{{1
     for jj in range(ii+1, len(a:lines)-1)
         let line = a:lines[jj]
 
-        if has_key(self, 'close_pattern') && line.text =~# self.close_pattern
+        if has_key(self, 'close_pattern') && line.code =~# self.close_pattern
             let self.inside_line = line
             return
         endif
@@ -531,29 +579,20 @@ function! s:CloseImports(lines, folds) abort dict "{{{1
     for jj in range(ii, len(a:lines)-1)
         let line = a:lines[jj]
 
-        if continuation_paren
-            let self.inside_line = line
-            let continuation_paren = (line.text !~# ')')
-
-        elseif continuation_backslash 
+        if line.code =~# s:import_pattern || line.is_continuation
             let self.inside_line = line
 
-        elseif line.text =~# s:import_pattern
-            let self.inside_line = line
-            let continuation_paren = (line.text =~# '([^)]*$')
+        elseif line.code =~# s:blank_pattern
 
-        elseif line.is_code && line.text !~# s:import_continue_pattern
+        else
             return
         endif
-
-        let continuation_backslash = (line.text =~# '\\$')
 
         " Without this, each import line will try to open a new fold.
         if jj != ii && has_key(a:folds, line.lnum)
             let a:folds[line.lnum].ignore = 1
         endif
     endfor
-
 endfunction
 
 function! s:CloseDecorator(lines, folds) abort dict "{{{1
@@ -603,7 +642,7 @@ function! s:CloseBlock(lines, folds) abort dict "{{{1
         " The outside line is the first line (excluding blanks, comments, and 
         " multiline strings) with an indent level equal to or lesser than the 
         " line that opened the fold.
-        if line.is_code && line.indent <= self.opening_line.indent
+        if line.indent <= self.opening_line.indent && ! line.ignore_indent
             let self.inside_line = inside_line
             let self.outside_line = line
             return
@@ -612,12 +651,18 @@ function! s:CloseBlock(lines, folds) abort dict "{{{1
 endfunction
 
 function! s:CloseDataStructure(lines, folds) abort dict "{{{1
-    call call('s:CloseBlock', [a:lines, a:folds], self)
+    " `self.lnum` is 1-indexed, indices into `lines` are 0-indexed.
+    let ii = self.lnum - 1
 
-    if self.outside_line.text =~# s:data_struct_close_pattern 
-        let self.inside_line = self.outside_line
-        let self.outside_line = {}
-    endif
+    for jj in range(ii+1, len(a:lines)-1)
+        let line = a:lines[jj]
+
+        if line.paren_level > self.opening_line.paren_level
+            let self.inside_line = line
+        else
+            return
+        endif
+    endfor
 endfunction
 
 function! s:FindDecoratorTitle(focus, foldstart, foldend) abort "{{{1
@@ -640,7 +685,7 @@ function! s:FindDecoratorTitle(focus, foldstart, foldend) abort "{{{1
 endfunction
 
 function! s:FindDocstringTitle(focus, foldstart, foldend) abort "{{{1
-    let ii = matchend(a:focus.text, s:string_start_pattern.'\s*')
+    let ii = matchend(a:focus.text, s:multiline_string_start_pattern.'\s*')
     let line = strpart(a:focus.text, ii)
     let indent = repeat(' ', indent(a:foldstart))
 
