@@ -163,7 +163,7 @@ function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
 
 endfunction
 
-function! coiledsnake#loadSettings() abort "{{{1
+function! coiledsnake#LoadSettings() abort "{{{1
     call s:SetIfUndef('g:coiled_snake_set_foldexpr', 1)
     call s:SetIfUndef('g:coiled_snake_set_foldtext', 1)
     call s:SetIfUndef('g:coiled_snake_foldtext_flags', ['doc', 'static'])
@@ -186,12 +186,12 @@ function! coiledsnake#EnableFoldExpr() abort "{{{1
 endfunction
 
 function! coiledsnake#ResetFoldText() abort "{{{1
-    let &foldtext = w:coiled_snake_saved_foldtext
+    let &foldtext = get(w:, 'coiled_snake_saved_foldtext', &foldtext)
 endfunction
 
 function! coiledsnake#ResetFoldExpr() abort "{{{1
-    let &foldexpr = w:coiled_snake_saved_foldexpr
-    let &foldmethod = w:coiled_snake_saved_foldmethod
+    let &foldexpr = get(w:, 'coiled_snake_saved_foldexpr', &foldexpr)
+    let &foldmethod = get(w:, 'coiled_snake_saved_foldmethod', &foldmethod)
     augroup CoiledSnake
         autocmd! TextChanged,InsertLeave <buffer>
     augroup END
