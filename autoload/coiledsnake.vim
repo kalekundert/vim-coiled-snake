@@ -18,10 +18,10 @@ let s:manual_ignore_pattern = '#$'
 " }}}1
 
 function! coiledsnake#FoldExpr(lnum) abort "{{{1
-    if !exists('b:marks')
-        let b:marks = coiledsnake#RefreshFolds()
+    if !exists('b:coiled_snake_marks')
+        let b:coiled_snake_marks = coiledsnake#RefreshFolds()
     endif
-    return get(b:marks, a:lnum, '=')
+    return get(b:coiled_snake_marks, a:lnum, '=')
 endfunction
 
 function! coiledsnake#FoldText() abort "{{{1
@@ -29,13 +29,13 @@ function! coiledsnake#FoldText() abort "{{{1
 endfunction
 
 function! coiledsnake#ClearFolds() abort "{{{1
-    if exists('b:marks')
-        unlet b:marks
+    if exists('b:coiled_snake_marks')
+        unlet b:coiled_snake_marks
     endif
 endfunction
 
 function! coiledsnake#RefreshFolds() abort "{{{1
-    let b:marks = {}
+    let b:coiled_snake_marks = {}
     let lines = s:LinesFromBuffer()
     let folds = s:FoldsFromLines(lines)
 
@@ -44,7 +44,7 @@ function! coiledsnake#RefreshFolds() abort "{{{1
         let l:fold = folds[lnum]
 
         " Open a fold at the appropriate level on this line.
-        let b:marks[l:fold.lnum] = '>' . l:fold.level
+        let b:coiled_snake_marks[l:fold.lnum] = '>' . l:fold.level
 
         " If no inside line was found, the fold reaches the end of the file and 
         " doesn't need to be closed.
@@ -58,7 +58,7 @@ function! coiledsnake#RefreshFolds() abort "{{{1
                     \ && l:fold.level == get(l:fold.next_fold, 'level')
             let closing_lnum = min([
                     \ l:fold.inside_line.lnum + l:fold.num_blanks_below,
-                    \ l:fold.outside_line.lnum])
+                    \ l:fold.outside_line.lnum - 1])
 
         " If only an inside line was specified, close the fold exactly on that 
         " line.
@@ -70,18 +70,17 @@ function! coiledsnake#RefreshFolds() abort "{{{1
         " previous entries.  Due to the way the code is organized, any previous 
         " entries will be higher level folds, and we want those to take 
         " precedence.
-        if ! has_key(b:marks, closing_lnum)
-            let b:marks[closing_lnum] = '<' . l:fold.level
+        if ! has_key(b:coiled_snake_marks, closing_lnum)
+            let b:coiled_snake_marks[closing_lnum] = '<' . l:fold.level
         endif
 
         " Ignore folds that end up opening and closing on the same line.
-        if closing_lnum == l:fold.lnum
-            unlet b:marks[closing_lnum]
+        if closing_lnum <= l:fold.lnum
+            unlet b:coiled_snake_marks[closing_lnum]
         endif
-
     endfor
 
-    return b:marks
+    return b:coiled_snake_marks
 endfunction
 
 function! coiledsnake#FormatText(foldstart, foldend) abort " {{{1
@@ -231,7 +230,7 @@ function! coiledsnake#DebugFolds() abort "{{{1
                     \ get(l:fold.inside_line, 'lnum', '??'),
                     \ get(l:fold.outside_line, 'lnum', '??'),
                     \ get(l:fold, 'type', '???'),
-                    \ get(l:fold.parent, 'type', '???'),
+                    \ get(l:fold.parent, 'type', ''),
                     \ get(l:fold, 'level', '?'),
                     \ get(l:fold, 'ignore', '?'),
                     \ get(l:fold, 'min_lines', '?'),
