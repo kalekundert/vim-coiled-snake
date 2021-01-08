@@ -170,13 +170,10 @@ function! coiledsnake#LoadSettings() abort "{{{1
 endfunction
 
 function! coiledsnake#EnableFoldText() abort "{{{1
-    let w:coiled_snake_saved_foldtext = &foldtext
     let &l:foldtext = 'coiledsnake#FoldText()'
 endfunction
 
 function! coiledsnake#EnableFoldExpr() abort "{{{1
-    let w:coiled_snake_saved_foldexpr = &foldexpr
-    let w:coiled_snake_saved_foldmethod = &foldmethod
     let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
     let &l:foldmethod = 'expr'
     augroup CoiledSnake
@@ -185,12 +182,20 @@ function! coiledsnake#EnableFoldExpr() abort "{{{1
 endfunction
 
 function! coiledsnake#ResetFoldText() abort "{{{1
-    let &l:foldtext = get(w:, 'coiled_snake_saved_foldtext', &g:foldtext)
+    " Only reset if the value is the same as we initially set
+    if &foldtext ==# 'coiledsnake#FoldText()'
+        let &l:foldtext = &g:foldtext
+    endif
 endfunction
 
 function! coiledsnake#ResetFoldExpr() abort "{{{1
-    let &l:foldexpr = get(w:, 'coiled_snake_saved_foldexpr', &g:foldexpr)
-    let &l:foldmethod = get(w:, 'coiled_snake_saved_foldmethod', &g:foldmethod)
+    " Only reset if the value is the same as we initially set
+    if &foldexpr ==# 'coiledsnake#FoldExpr(v:lnum)'
+        let &l:foldexpr = &g:foldexpr
+    endif
+    if &foldmethod ==# 'expr'
+        let &l:foldmethod = &g:foldmethod
+    endif
     augroup CoiledSnake
         autocmd! TextChanged,InsertLeave <buffer>
     augroup END
