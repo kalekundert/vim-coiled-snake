@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 foo = [
         1,
         2,
