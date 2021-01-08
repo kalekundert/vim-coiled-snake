@@ -31,6 +31,7 @@ endfunction
 function! coiledsnake#ClearFolds() abort "{{{1
     if exists('b:coiled_snake_marks')
         unlet b:coiled_snake_marks
+        set foldmethod=expr
     endif
 endfunction
 
