@@ -171,26 +171,26 @@ endfunction
 
 function! coiledsnake#EnableFoldText() abort "{{{1
     let w:coiled_snake_saved_foldtext = &foldtext
-    let &foldtext = 'coiledsnake#FoldText()'
+    let &l:foldtext = 'coiledsnake#FoldText()'
 endfunction
 
 function! coiledsnake#EnableFoldExpr() abort "{{{1
     let w:coiled_snake_saved_foldexpr = &foldexpr
     let w:coiled_snake_saved_foldmethod = &foldmethod
-    let &foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
-    let &foldmethod = 'expr'
+    let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
+    let &l:foldmethod = 'expr'
     augroup CoiledSnake
         autocmd TextChanged,InsertLeave <buffer> call coiledsnake#ClearFolds()
     augroup END
 endfunction
 
 function! coiledsnake#ResetFoldText() abort "{{{1
-    let &foldtext = get(w:, 'coiled_snake_saved_foldtext', &foldtext)
+    let &l:foldtext = get(w:, 'coiled_snake_saved_foldtext', &g:foldtext)
 endfunction
 
 function! coiledsnake#ResetFoldExpr() abort "{{{1
-    let &foldexpr = get(w:, 'coiled_snake_saved_foldexpr', &foldexpr)
-    let &foldmethod = get(w:, 'coiled_snake_saved_foldmethod', &foldmethod)
+    let &l:foldexpr = get(w:, 'coiled_snake_saved_foldexpr', &g:foldexpr)
+    let &l:foldmethod = get(w:, 'coiled_snake_saved_foldmethod', &g:foldmethod)
     augroup CoiledSnake
         autocmd! TextChanged,InsertLeave <buffer>
     augroup END
