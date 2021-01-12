@@ -1,8 +1,9 @@
-function! s:OnBufEnter() " {{{1
+function! s:setFolds() " {{{1
     let w:coiled_snake_folded = 0
 
     if ! (exists('b:coiled_snake_should_fold') && b:coiled_snake_should_fold)
-        " not python
+        " not python, reset folds if we had set them earlier
+        call s:resetFolds()
         return
     endif
     if ! (&foldmethod ==# &g:foldmethod
@@ -24,7 +25,7 @@ function! s:OnBufEnter() " {{{1
     let w:coiled_snake_folded = 1
 endfunction
 
-function! s:OnBufLeave() " {{{1
+function! s:resetFolds() " {{{1
     if (exists('w:coiled_snake_folded') && w:coiled_snake_folded)
         call coiledsnake#ResetFoldText()
         call coiledsnake#ResetFoldExpr()
@@ -33,8 +34,9 @@ endfunction
 
 augroup CoiledSnake " {{{1
     autocmd!
-    autocmd BufEnter * call s:OnBufEnter()
-    autocmd BufLeave * call s:OnBufLeave()
+    " BufWinEnter to handle Buffers entering windows
+    " WinNew to handle :split, because it doesn't trigger BufWinEnter
+    autocmd BufWinEnter,WinNew * call s:setFolds()
 augroup END
 " }}}1
 
