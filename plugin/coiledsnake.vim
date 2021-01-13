@@ -1,9 +1,15 @@
-function! s:OnFileType() " {{{1
-    if ! get(b:, 'coiled_snake_bufenter', 0)
-        " Don't do anything before the buffer has been loaded.
+function! s:setFolds() " {{{1
+    let w:coiled_snake_folded = 0
+
+    if ! (exists('b:coiled_snake_should_fold') && b:coiled_snake_should_fold)
+        " not python, reset folds if we had set them earlier
+        call s:resetFolds()
         return
-    elseif &filetype != 'python' || &diff
-        " Don't do anything if this isn't a python file.
+    endif
+    if ! (&foldmethod ==# &g:foldmethod
+                \&& &foldexpr ==# &g:foldexpr
+                \&& &foldmethod ==# &g:foldmethod)
+        " something is not at default value. not safe to fold.
         return
     endif
 
@@ -15,22 +21,23 @@ function! s:OnFileType() " {{{1
     if g:coiled_snake_set_foldexpr
         call coiledsnake#EnableFoldExpr()
     endif
+
+    let w:coiled_snake_folded = 1
 endfunction
 
-function! s:OnBufEnter() " {{{1
-    let b:coiled_snake_bufenter = 1
-    call s:OnFileType()
-endfunction
-
-function! s:OnBufLeave() " {{{1
-    call coiledsnake#ResetFoldText()
-    call coiledsnake#ResetFoldExpr()
+function! s:resetFolds() " {{{1
+    if (exists('w:coiled_snake_folded') && w:coiled_snake_folded)
+        call coiledsnake#ResetFoldText()
+        call coiledsnake#ResetFoldExpr()
+    endif
 endfunction
 
 augroup CoiledSnake " {{{1
-    autocmd FileType * call s:OnFileType()
-    autocmd BufEnter * call s:OnBufEnter()
-    autocmd BufLeave * call s:OnBufLeave()
+    autocmd!
+    " BufWinEnter to handle Buffers entering windows
+    " WinNew to handle :split, because it doesn't trigger BufWinEnter
+    autocmd BufWinEnter,WinNew * call s:setFolds()
 augroup END
+" }}}1
 
 " vim: ts=4 sts=4 sw=4 fdm=marker et sr
