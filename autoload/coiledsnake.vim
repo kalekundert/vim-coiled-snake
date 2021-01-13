@@ -31,6 +31,7 @@ endfunction
 function! coiledsnake#ClearFolds() abort "{{{1
     if exists('b:coiled_snake_marks')
         unlet b:coiled_snake_marks
+        set foldmethod=expr
     endif
 endfunction
 
@@ -227,13 +228,13 @@ function! coiledsnake#DebugFolds() abort "{{{1
     let lines = s:LinesFromBuffer()
     let folds = s:FoldsFromLines(lines)
 
-    echo "  # In Out Type      Parent    Lvl Ig N? >? Text"
+    echo "  #  In Out Type      Parent    Lvl Ig N? >? Text"
     for lnum in sort(keys(folds), 's:LowToHigh')
         let fold = folds[lnum]
-        echo printf("%3s %2s %3s %-9.9s %-9.9s %3s %2s %2s %2s %s",
+        echo printf("%3s %3s %3s %-9.9s %-9.9s %3s %2s %2s %2s %s",
                     \ get(l:fold, 'lnum', '???'),
-                    \ get(l:fold.inside_line, 'lnum', '??'),
-                    \ get(l:fold.outside_line, 'lnum', '??'),
+                    \ get(l:fold.inside_line, 'lnum', 'EOF'),
+                    \ get(l:fold.outside_line, 'lnum', 'EOF'),
                     \ get(l:fold, 'type', '???'),
                     \ get(l:fold.parent, 'type', ''),
                     \ get(l:fold, 'level', '?'),
@@ -257,7 +258,8 @@ endfunction
 function! coiledsnake#DebugText() abort "{{{1
     echo "#    Line"
     for lnum in range(1, line('$'))
-        echo coiledsnake#FormatText(lnum, lnum+1)
+        " This looks better is there's some sort of gutter on the left.
+        echo lnum coiledsnake#FormatText(lnum, lnum+1)
     endfor
 endfunction
 
