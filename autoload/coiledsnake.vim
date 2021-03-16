@@ -354,7 +354,7 @@ function! s:FoldsFromLines(lines) abort "{{{1
         let folds[l:fold.lnum] = l:fold
     endfor
 
-    " Make note of consecutive folds.  Blank lines may be collapsed bweteen 
+    " Make note of consecutive folds.  Blank lines may be collapsed between 
     " consecutive folds of the same type.
     for lnum in sort(keys(folds), 's:LowToHigh')
         let l:fold = folds[lnum]
@@ -661,6 +661,7 @@ endfunction
 function! s:CloseDataStructure(lines, folds) abort dict "{{{1
     " `self.lnum` is 1-indexed, indices into `lines` are 0-indexed.
     let ii = self.lnum - 1
+    let self.inside_line = a:lines[ii]
 
     for jj in range(ii+1, len(a:lines)-1)
         let line = a:lines[jj]
