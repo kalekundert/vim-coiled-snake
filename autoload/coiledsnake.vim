@@ -376,6 +376,7 @@ function! s:InitLine(lnum, state) abort "{{{1
     let line.ignore_indent = 0
     let line.paren_level = 0
     let line.is_blank = 0
+    let line.is_comment = 0
     let line.is_continuation = 0
 
     " Handle strings and comments first, because they will prune non-code 
@@ -437,7 +438,7 @@ endfunction
 function! s:InitLineComment(line, state) "{{{1
     let a:line.code = substitute(a:line.code, '\s*#.*$', '', '')
     if a:line.code =~# s:blank_pattern
-        let a:line.ignore_indent = 1
+        let a:line.is_comment = 1
     endif
 endfunction
 
@@ -455,7 +456,6 @@ function! s:InitLineParen(line, state) "{{{1
     let a:state.paren_level -= count(a:line.code, ')')
     let a:state.paren_level -= count(a:line.code, ']')
     let a:state.paren_level -= count(a:line.code, '}')
-
 endfunction
 
 function! s:InitLineBackslash(line, state) "{{{1
@@ -636,6 +636,7 @@ endfunction
 function! s:CloseBlock(lines, folds) abort dict "{{{1
     " `fold.lnum` is 1-indexed, indices into `lines` are 0-indexed.
     let ii = self.lnum - 1
+    let end = {}
 
     for jj in range(ii+1, len(a:lines)-1)
         let line = a:lines[jj]
@@ -647,15 +648,28 @@ function! s:CloseBlock(lines, folds) abort dict "{{{1
             let inside_line = prev_line
         endif
 
-        " The outside line is the first line (excluding blanks, comments, and 
-        " multiline strings) with an indent level equal to or lesser than the 
-        " line that opened the fold.
-        if line.indent <= self.opening_line.indent && ! line.ignore_indent
-            let self.inside_line = inside_line
-            let self.outside_line = line
-            return
+        " The outside line is the first line that should not be part of the 
+        " fold, based on indentation.  Comments are handled specially.  They 
+        " are the outside line if (i) they are dedented and (ii) they aren't 
+        " immediately followed by lines that would be included in the fold.
+        if line.is_blank || line.ignore_indent
+            continue
+        elseif line.indent > self.opening_line.indent
+            let end = {}
+        elseif line.is_comment && ! len(end)
+            let end = {'inside_line': inside_line, 'outside_line': line}
+        else
+            if ! len(end)
+                let end = {'inside_line': inside_line, 'outside_line': line}
+            endif
+            break
         endif
     endfor
+
+    if len(end)
+        let self.inside_line = end['inside_line']
+        let self.outside_line = end['outside_line']
+    endif
 endfunction
 
 function! s:CloseDataStructure(lines, folds) abort dict "{{{1

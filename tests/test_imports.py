@@ -27,7 +27,7 @@ import foo
 import foo
 import foo
 
-# Comment
+# Comments before code aren't included in the block.
 code = 1
 
 from foo import foo
@@ -59,7 +59,7 @@ from foo import foo
 from foo import foo
 from foo import foo
 
-# Comment
+# Comments before code aren't included in the block.
 code = 1
 
 # Imports broken across multiple lines should also be folded.
