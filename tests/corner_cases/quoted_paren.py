@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Each of the bar() functions should be folded.
+# Each of the `bar()` functions should be folded.
 # None of the `a = ...` or `foo(...)` lines should be folded.
 
 a = "("
