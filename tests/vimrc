@@ -1,10 +1,11 @@
+" Minimal vimrc for automated and manual testing.
+let s:dir = expand('<sfile>:p:h')
+execute 'set runtimepath^=' .. s:dir .. '/..'
+filetype plugin indent on
 set cpoptions-=C
 
-call plug#begin()
-Plug '~/vim-coiled-snake'
-Plug 'Konfekt/FastFold'
-call plug#end()
-
+" These options are only to make visual debugging easier; they should not 
+" affect the automated tests.
 set foldcolumn=5
 set signcolumn=yes
 set number

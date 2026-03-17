@@ -1,0 +1,6 @@
+[submodule "tests/plugins/FastFold"]
+	path = tests/plugins/FastFold
+	url = https://github.com/Konfekt/FastFold.git
+[submodule "tests/plugins/SimpylFold"]
+	path = tests/plugins/SimpylFold
+	url = https://github.com/tmhedberg/SimpylFold.git
