@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-vim --clean -u vimrc/default "$@"
+vim --clean -u vimrcs/default "$@"

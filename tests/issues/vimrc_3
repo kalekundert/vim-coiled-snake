@@ -1,6 +1,0 @@
-call plug#begin('~/.vim/plugged')
-Plug '~/hacking/projects/vim-coiled-snake'
-Plug 'Konfekt/FastFold'
-call plug#end()
-
-set number

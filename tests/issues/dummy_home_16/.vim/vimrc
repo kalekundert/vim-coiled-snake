@@ -1,5 +1,0 @@
-filetype plugin indent on
-
-" Recommended for vim-gitgutter
-set updatetime=100
-

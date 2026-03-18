@@ -1,0 +1,4 @@
+source <sfile>:p:h:h:h/vimrcs/minimal
+
+" Need this setting to reproduce.
+set number

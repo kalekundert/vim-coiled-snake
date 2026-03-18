@@ -13,8 +13,8 @@ Run the automated test suite with `run_tests.py`:
 ./run_tests.py --nvim
 
 # Run specific test files
-./run_tests.py easy/function.py
-./run_tests.py corner_cases/fold_in_string.py issues/test_7.py
+./run_tests.py examples/class.py
+./run_tests.py examples/syntax/*.py
 ```
 
 Each test file (`.py`) has a companion `.marks` file containing the expected
@@ -60,8 +60,8 @@ the default `.vimrc` file used by tests that don't specify their own.
 For manual fold inspection in a running Vim/Neovim session:
 
 ```sh
-tests/run_vim.sh tests/test_blocks.py
-tests/run_nvim.sh tests/test_blocks.py
+tests/run_vim.sh examples/class.py
+tests/run_nvim.sh examples/class.py
 ```
 
 Debug commands (run inside Vim on a Python buffer):
@@ -71,21 +71,4 @@ Debug commands (run inside Vim on a Python buffer):
 :call coiledsnake#DebugLines()
 :call coiledsnake#DebugMarks()
 :call coiledsnake#DebugText()
-```
-
-## Test file layout
-
-```
-tests/
-  run_tests.py           # automated test runner
-  collect_marks.vim      # vim script called by the runner
-  vimrc                  # default vimrc for automated tests
-  test_*.py              # main test inputs
-  test_*.marks           # expected fold marks
-  corner_cases/          # string/comment/paren edge cases
-  easy/                  # minimal single-feature inputs
-  issues/                # regression tests for specific GitHub issues
-    test_N.py
-    test_N.marks
-    test_N.vimrc         # custom vimrc, if the issue needs one
 ```

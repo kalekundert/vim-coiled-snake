@@ -1,6 +1,9 @@
 [submodule "tests/plugins/FastFold"]
-	path = tests/plugins/FastFold
+	path = tests/vimrcs/plugins/FastFold
 	url = https://github.com/Konfekt/FastFold.git
 [submodule "tests/plugins/SimpylFold"]
-	path = tests/plugins/SimpylFold
+	path = tests/vimrcs/plugins/SimpylFold
 	url = https://github.com/tmhedberg/SimpylFold.git
+[submodule "tests/vimrcs/plugins/vim-gitgutter"]
+	path = tests/vimrcs/plugins/vim-gitgutter
+	url = https://github.com/airblade/vim-gitgutter.git

@@ -1,0 +1,10 @@
+let s:dir = expand('<sfile>:p:h')
+execute 'set runtimepath^=' .. s:dir .. 'plugins/SimpylFold'
+execute 'set runtimepath^=' .. s:dir .. 'plugins/FastFold'
+
+filetype plugin indent on
+
+set foldcolumn=5
+set signcolumn=yes
+set number
+

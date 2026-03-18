@@ -1,0 +1,5 @@
+" Minimal vimrc for automated and manual testing.
+let s:repo_root = expand('<sfile>:p:h:h:h')
+execute 'set runtimepath^=' .. s:repo_root
+filetype plugin indent on
+set cpoptions-=C

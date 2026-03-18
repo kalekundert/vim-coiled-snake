@@ -1,0 +1,9 @@
+let s:test_dir = expand('<sfile>:p:h:h:h')
+
+execute 'source ' .. s:test_dir .. '/vimrcs/minimal'
+execute 'set runtimepath^=' .. s:test_dir .. '/vimrcs/plugins/vim-gitgutter'
+runtime! plugin/*.vim
+
+" Recommended for vim-gitgutter
+set signcolumn=yes
+set updatetime=100

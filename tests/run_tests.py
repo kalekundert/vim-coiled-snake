@@ -15,7 +15,8 @@ from typing import Protocol, Callable, Iterable, Sequence
 
 TEST_DIR = Path(__file__).parent
 COLLECT_SCRIPT = TEST_DIR / 'collect_marks.vim'
-DEFAULT_VIMRC = TEST_DIR / 'vimrc'
+DEFAULT_VIMRC = TEST_DIR / 'vimrcs' / 'default'
+EXAMPLES_DIR = TEST_DIR / 'examples'
 
 class Runner(Protocol):
     name: str
@@ -52,7 +53,7 @@ class SubprocessRunner(Runner):
             p = subprocess.run(
                 cmd,
                 env=env,
-                timeout=30,
+                timeout=10,
                 stdin=subprocess.DEVNULL,
                 capture_output=True,
                 text=True,
@@ -158,16 +159,11 @@ def discover_tests(
 ) -> list[TestCase]:
     """Find all test input files, return list of TestCase."""
 
-    def glob(pattern):
-        return sorted(TEST_DIR.glob(pattern))
-
     if test_paths is None:
-        test_paths = [
-            *glob('test_*.py'),
-            *glob('corner_cases/*.py'),
-            *glob('easy/*.py'),
-            *glob('issues/test_*.py'),
-        ]
+        test_paths = sorted(
+                EXAMPLES_DIR.glob('**/*.py'),
+                key=lambda x: (len(x.parts), x)
+        )
 
     return [
         TestCase(
