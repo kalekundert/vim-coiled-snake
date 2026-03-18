@@ -10,7 +10,7 @@ let s:multiline_string_start_pattern = '\v[bBfFrRuU]*(''''''|""")\\?'
 let s:multiline_string_start_end_pattern = s:multiline_string_start_pattern . '.*\1'
 let s:uniline_string_start_pattern = '\v(''''''|"""|''|")' " triple-quotes first, so that the longest match is made.
 let s:uniline_string_end_pattern = '\\@<!(\\\\)*\\@<!\1' " https://stackoverflow.com/questions/42598040/python-regex-for-matching-odd-number-of-consecutive-backslashes
-let s:uniline_string_pattern = s:uniline_string_start_pattern . '.{-}' . s:uniline_string_end_pattern
+let s:uniline_string_pattern = s:uniline_string_start_pattern . '(.{-})' . s:uniline_string_end_pattern
 let s:docstring_pattern = '^\s*' . s:multiline_string_start_pattern
 let s:data_struct_pattern = '\v(\{|\[|\()\s*$'
 let s:string_struct_pattern = s:multiline_string_start_pattern . 'START\s*$'
@@ -358,10 +358,10 @@ function! s:InitLine(lnum, state) abort "{{{1
     let line.is_comment = 0
     let line.is_continuation = 0
 
-    " Handle strings and comments first, because they will prune non-code 
-    " content that might otherwise confuse later parsers.
-    call s:InitLineString(line, a:state)
+    " Handle comments and strings first, because they will prune non-code 
+    " content that might otherwise confuse later parsers.  
     call s:InitLineComment(line, a:state)
+    call s:InitLineString(line, a:state)
     call s:InitLineParen(line, a:state)
     call s:InitLineBackslash(line, a:state)
     call s:InitLineBlank(line, a:state)
@@ -390,11 +390,18 @@ function! s:InitLineString(line, state) "{{{1
     endif
 
     " Ignore text within strings.
-    
+
+    " This substitution has a few non-obvious requirements.  First, because 
+    " `uniline_string_pattern` also matches multiline string delimiters, it 
+    " must leave the latter unchanged.  Second, to avoid the possibility of 
+    " creating multiline delimiters where before there were none, it must not 
+    " simply replace all strings with empty strings.  So we keep the 
+    " delimiters, but replace any content with something innocuous.
+
     let a:line.code = substitute(
                     \       a:line.code,
                     \       s:uniline_string_pattern,
-                    \       '\1\1',
+                    \       '\=submatch(1).repeat(".", strlen(submatch(2))).submatch(1)',
                     \       'g',
                     \ )
 

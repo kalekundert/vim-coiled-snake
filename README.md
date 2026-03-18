@@ -87,7 +87,7 @@ Configuration
 No configuration is necessary, but the following options are available:
 
 - ``g:coiled_snake_set_foldtext`` (default: ``1``)
-    
+
   If false, don't load the algorithm for labeling folds.
 
 - ``g:coiled_snake_set_foldexpr`` (default: ``1``)
@@ -116,15 +116,15 @@ No configuration is necessary, but the following options are available:
   nested in another fold, should it be folded at all, how should trailing blank 
   lines be handled, etc).  By interacting with this object, you can do a lot to 
   control how the code is folded.
-  
+
   The best way to illustrate this is with an example:
 
       function! g:CoiledSnakeConfigureFold(fold)
-      
+
           " Don't fold nested classes.
           if a:fold.type == 'class'
               let a:fold.max_level = 1
-      
+
           " Don't fold nested functions, but do fold methods (i.e. functions 
           " nested inside a class).
           elseif a:fold.type == 'function'
@@ -132,17 +132,17 @@ No configuration is necessary, but the following options are available:
               if get(a:fold.parent, 'type', '') == 'class'
                   let a:fold.max_level = 2
               endif
-      
+
           " Only fold imports if there are 3 or more of them.
           elseif a:fold.type == 'import'
               let a:fold.min_lines = 3
           endif
-      
+
           " Don't fold anything if the whole program is shorter than 30 lines.
           if line('$') < 30
               let a:fold.ignore = 1
           endif
-      
+
       endfunction
 
     By default, import blocks are only folded if they are 4 lines or longer, 
@@ -189,7 +189,7 @@ No configuration is necessary, but the following options are available:
 
   - ``NumLines()`` (int, read-only): A method that returns the minimum number 
     of lines that will be included in the fold, not counting any trailing blank 
-    lines that may be collapsed.  
+    lines that may be collapsed.
 
   - ``opening_line`` (Line, read-only): A ``Line`` object (see below) 
     representing the first line of the fold.
@@ -197,7 +197,7 @@ No configuration is necessary, but the following options are available:
   - ``inside_line`` (Line, read-only): A ``Line`` object (see below) 
     representing the last line that should be included in the fold.  The fold 
     may actually end on a subsequent line, e.g. to collapse trailing blank 
-    lines. 
+    lines.
 
   - ``outside_line`` (Line, read-only): A ``Line`` object (see below) 
     representing the first line after the fold that should *not* be included in 
@@ -230,13 +230,37 @@ No configuration is necessary, but the following options are available:
   - ``is_continuation`` (bool, read-only): If true, this line is part of an 
     expression that began on a previous line.
 
+Known Bugs
+----------
+
+### String literals in f-strings
+
+In python 3.12, it became legal to for f-strings to contain string literals 
+with the same delimiter as the f-string itself, e.g.:
+
+```
+f'items: {', '.join(items)}'
+```
+
+Unfortunately, this is very hard for a vim plugin to parse correctly.  Coiled 
+Snake does not, and would treat the above example as two strings separated by a 
+non-string comma.  Commas don't affect how folds are detected, so this 
+particular example is innocuous.  But if the string literal contained an 
+un-matched "data structure" character (e.g. `[`, `{`, or `(`), then Coiled 
+Snake would mistakenly create a fold that extends all the way to the end of the 
+file.
+
+I have vague plans to reimplement this whole plugin in python at some point. 
+Once I do that, I will have access to a real python parser, and I will be able 
+to fix this bug.  Until then, I'll at most try to hack together support for 
+reasonably common use cases.
 
 Troubleshooting
 ---------------
 - If docstrings don't seems to be folding properly, the problem may be that vim 
   is running in vi-compatibility mode.  Coiled Snake does not work in this 
-  mode, and (for various reasons) docstrings are usually the first symptom.  
-  The solution is to either disable comptibility mode (`:set nocompatible`) or 
+  mode, and (for various reasons) docstrings are usually the first symptom. 
+  The solution is to either disable compatibility mode (`:set nocompatible`) or 
   to specifically allow line continuation in vim scripts (`:set cpoptions-=C`).
 
 - If anything else seems broken, it may be that the code is crashing in the 
@@ -246,7 +270,7 @@ Troubleshooting
   themselves) or `:call coiledsnake#DebugText()` (if the problem is with the 
   fold labels).  If there are any errors, include that information in a [bug 
   report](https://github.com/kalekundert/vim-coiled-snake/issues).
-  
+
 Contributing
 ------------
 [Bug reports](https://github.com/kalekundert/vim-coiled-snake/issues) and [pull 
