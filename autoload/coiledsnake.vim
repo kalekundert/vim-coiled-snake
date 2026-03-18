@@ -31,7 +31,6 @@ endfunction
 function! coiledsnake#ClearFolds() abort "{{{1
     if exists('b:coiled_snake_marks')
         unlet b:coiled_snake_marks
-        set foldmethod=expr
     endif
 endfunction
 
@@ -178,27 +177,7 @@ function! coiledsnake#EnableFoldExpr() abort "{{{1
     let &l:foldexpr = 'coiledsnake#FoldExpr(v:lnum)'
     let &l:foldmethod = 'expr'
     augroup CoiledSnake
-        autocmd TextChanged,InsertLeave <buffer> call coiledsnake#ClearFolds()
-    augroup END
-endfunction
-
-function! coiledsnake#ResetFoldText() abort "{{{1
-    " Only reset if the value is the same as we initially set
-    if &foldtext ==# 'coiledsnake#FoldText()'
-        let &l:foldtext = &g:foldtext
-    endif
-endfunction
-
-function! coiledsnake#ResetFoldExpr() abort "{{{1
-    " Only reset if the value is the same as we initially set
-    if &foldexpr ==# 'coiledsnake#FoldExpr(v:lnum)'
-        let &l:foldexpr = &g:foldexpr
-    endif
-    if &foldmethod ==# 'expr'
-        let &l:foldmethod = &g:foldmethod
-    endif
-    augroup CoiledSnake
-        autocmd! TextChanged,InsertLeave <buffer>
+        autocmd! TextChanged,InsertLeave <buffer> call coiledsnake#ClearFolds()
     augroup END
 endfunction
 
