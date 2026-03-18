@@ -1,7 +1,7 @@
 " Patterns {{{1
 let s:blank_pattern = '^\s*$'
 let s:comment_pattern = '^\s*#'
-let s:import_pattern = '^\(import\|from\)'
+let s:import_pattern = '^\s*\(import\|from\)'
 let s:class_pattern = '^\s*class\s'
 let s:function_pattern = '^\s*\(\(async\s\+\)\?def\s\|if __name__\s==\)'
 let s:block_pattern = join([s:class_pattern, s:function_pattern], '\|')
